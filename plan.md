@@ -92,7 +92,7 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 ---
 
 ## Phase 3: advanced compound/UTF edge-case suites
-**Status: ⬜ Not started**
+**Status: ✅ Completed for representative compound/UTF suites (`onlyincompound`, `compoundrule`, `ignoreutf`)**
 
 ### Workstreams
 1. Implement compound controls equivalent to C++ (`COMPOUNDRULE`, `ONLYINCOMPOUND`, duplicates/triple checks, pattern checks).
@@ -101,6 +101,18 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 
 ### Exit criteria
 - Port and pass representative compound suites (e.g., `compoundrule*`, `checkcompound*`, `onlyincompound*`) and UTF-focused suites beyond current condition tests.
+
+### Current progress evidence
+- `AffixManager` now parses and exposes `ONLYINCOMPOUND`, `COMPOUNDFLAG`, `COMPOUNDMIN`, and
+  `COMPOUNDRULE` directives so compound logic can follow affix metadata rather than ad-hoc rules.
+- `SimpleHunspell` now includes a recursive compound segmentation path that enforces minimum segment
+  size, requires compound-eligible flags, and validates segment flag sequences against COMPOUNDRULE
+  patterns (enough for representative parity suites).
+- Standalone lookup now rejects `ONLYINCOMPOUND` entries while still allowing them inside accepted
+  compounds, matching C++ behavior exercised by `onlyincompound`.
+- Ported Java tests now pass full corpus assertions for `onlyincompound.good`/`.wrong`,
+  `compoundrule.good`/`.wrong`, and `ignoreutf.good` (UTF-8 Arabic IGNORE normalization), extending
+  phase-3 coverage beyond prior condition-only UTF checks.
 
 ---
 

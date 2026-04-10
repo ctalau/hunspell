@@ -44,7 +44,7 @@ Total tests: **140**
 - [ ] `needaffix5.dic`
 - [ ] `circumfix.dic`
 - [ ] `fogemorpheme.dic`
-- [ ] `onlyincompound.dic`
+- [x] `onlyincompound.dic` *(ported subset passing in Java: full `onlyincompound.good`/`onlyincompound.wrong` corpus assertions are passing, covering standalone `ONLYINCOMPOUND` rejection (`pseudo`, `pseudos`) and compound acceptance (`pseudofoo`, `foopseudo`, `foopseudos`))*
 - [ ] `complexprefixes.dic`
 - [ ] `complexprefixes2.dic`
 - [ ] `complexprefixesutf.dic`
@@ -55,7 +55,7 @@ Total tests: **140**
 - [ ] `utf8_bom2.dic`
 - [ ] `utf8_nonbmp.test`
 - [ ] `compoundflag.dic`
-- [ ] `compoundrule.dic`
+- [x] `compoundrule.dic` *(ported subset passing in Java: full `compoundrule.good`/`compoundrule.wrong` corpus assertions are passing, including COMPOUNDRULE sequence acceptance (`abc`, `acc`) and exhaustive rejection matrix)*
 - [ ] `compoundrule2.dic`
 - [ ] `compoundrule3.dic`
 - [ ] `compoundrule4.dic`
@@ -90,7 +90,7 @@ Total tests: **140**
 - [ ] `maputf.dic`
 - [ ] `reputf.dic`
 - [x] `ignore.dic` *(ported subset passing in Java: full `ignore.good` corpus assertions plus direct checks (`example`, `expression`, `xmpl`, `xprssn`, `reexpression`, `rxprssn`) covering `IGNORE aeiou` normalization of stems, affix strip/append, and lookup input)*
-- [ ] `ignoreutf.dic`
+- [x] `ignoreutf.dic` *(ported subset passing in Java: full `ignoreutf.good` corpus assertions are passing with UTF-8 Arabic diacritic IGNORE normalization)*
 - [ ] `right_to_left_mark.dic`
 - [ ] `1592880.dic`
 - [ ] `1695964.dic`

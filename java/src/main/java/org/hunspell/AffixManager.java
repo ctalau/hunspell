@@ -37,6 +37,10 @@ final class AffixManager {
     private String ignoreChars = "";
     private int forbiddenWordFlag = -1;
     private int needAffixFlag = -1;
+    private int onlyInCompoundFlag = -1;
+    private int compoundFlag = -1;
+    private int compoundMin = 3;
+    private final List<int[]> compoundRules = new ArrayList<>();
     private final List<String> breakTable = new ArrayList<>();
     private boolean breakTableExplicit;
     private final Map<Integer, List<AffixRule>> prefixes = new HashMap<>();
@@ -72,6 +76,22 @@ final class AffixManager {
 
     int needAffixFlag() {
         return needAffixFlag;
+    }
+
+    int onlyInCompoundFlag() {
+        return onlyInCompoundFlag;
+    }
+
+    int compoundFlag() {
+        return compoundFlag;
+    }
+
+    int compoundMin() {
+        return compoundMin;
+    }
+
+    List<int[]> compoundRules() {
+        return Collections.unmodifiableList(compoundRules);
     }
 
     List<String> breakTable() {
@@ -169,6 +189,35 @@ final class AffixManager {
             }
             if ("NEEDAFFIX".equals(parts[0]) && parts.length >= 2) {
                 needAffixFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("ONLYINCOMPOUND".equals(parts[0]) && parts.length >= 2) {
+                onlyInCompoundFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("COMPOUNDFLAG".equals(parts[0]) && parts.length >= 2) {
+                compoundFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("COMPOUNDMIN".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                compoundMin = Math.max(1, Integer.parseInt(parts[1]));
+                continue;
+            }
+            if ("COMPOUNDRULE".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                int count = Integer.parseInt(parts[1]);
+                int read = 0;
+                while (read < count && i + 1 < lines.size()) {
+                    i++;
+                    String ruleLine = lines.get(i).strip();
+                    if (ruleLine.isEmpty() || ruleLine.startsWith("#")) {
+                        continue;
+                    }
+                    String[] ruleTokens = ruleLine.split("\\s+");
+                    if (ruleTokens.length >= 2 && "COMPOUNDRULE".equals(ruleTokens[0])) {
+                        compoundRules.add(Flags.decode(ruleTokens[1], flagMode));
+                    }
+                    read++;
+                }
                 continue;
             }
             if ("BREAK".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
