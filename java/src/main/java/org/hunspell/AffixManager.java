@@ -45,6 +45,14 @@ final class AffixManager {
     private final List<AffixRule> allSuffixes = new ArrayList<>();
     private final java.util.Set<Integer> contClassFlags = new java.util.HashSet<>();
     private boolean haveContClass;
+    private final List<RepEntry> repTable = new ArrayList<>();
+    private final List<MapEntry> mapTable = new ArrayList<>();
+    private String tryChars = "";
+    private String keyString = "qwertyuiop|asdfghjkl|zxcvbnm";
+    private int maxNgramSugs = 4;
+    private int maxSugs = 15;
+    private int maxCpdSugs = 3;
+    private int nosuggestFlag = -1;
 
     FlagMode flagMode() {
         return flagMode;
@@ -80,6 +88,38 @@ final class AffixManager {
             return List.of("-", "^-", "-$");
         }
         return Collections.unmodifiableList(breakTable);
+    }
+
+    List<RepEntry> repTable() {
+        return Collections.unmodifiableList(repTable);
+    }
+
+    List<MapEntry> mapTable() {
+        return Collections.unmodifiableList(mapTable);
+    }
+
+    String tryChars() {
+        return tryChars;
+    }
+
+    String keyString() {
+        return keyString;
+    }
+
+    int maxNgramSugs() {
+        return maxNgramSugs;
+    }
+
+    int maxSugs() {
+        return maxSugs;
+    }
+
+    int maxCpdSugs() {
+        return maxCpdSugs;
+    }
+
+    int nosuggestFlag() {
+        return nosuggestFlag;
     }
 
     /** Strip IGNORE characters from a word, matching {@code AffixMgr::remove_ignored_chars}. */
@@ -171,6 +211,64 @@ final class AffixManager {
                 needAffixFlag = Flags.decodeSingle(parts[1], flagMode);
                 continue;
             }
+            if ("TRY".equals(parts[0]) && parts.length >= 2) {
+                tryChars = line.substring("TRY".length()).strip();
+                continue;
+            }
+            if ("KEY".equals(parts[0]) && parts.length >= 2) {
+                keyString = line.substring("KEY".length()).strip();
+                continue;
+            }
+            if ("NOSUGGEST".equals(parts[0]) && parts.length >= 2) {
+                nosuggestFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("MAXNGRAMSUGS".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                maxNgramSugs = Integer.parseInt(parts[1]);
+                continue;
+            }
+            if ("MAXCPDSUGS".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                maxCpdSugs = Integer.parseInt(parts[1]);
+                continue;
+            }
+            if ("REP".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                int count = Integer.parseInt(parts[1]);
+                int read = 0;
+                while (read < count && i + 1 < lines.size()) {
+                    i++;
+                    String entry = lines.get(i).strip();
+                    if (entry.isEmpty() || entry.startsWith("#")) {
+                        continue;
+                    }
+                    String[] tok = entry.split("\\s+");
+                    if (!"REP".equals(tok[0]) || tok.length < 3) {
+                        read++;
+                        continue;
+                    }
+                    parseRepEntry(tok[1], tok[2]);
+                    read++;
+                }
+                continue;
+            }
+            if ("MAP".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                int count = Integer.parseInt(parts[1]);
+                int read = 0;
+                while (read < count && i + 1 < lines.size()) {
+                    i++;
+                    String entry = lines.get(i).strip();
+                    if (entry.isEmpty() || entry.startsWith("#")) {
+                        continue;
+                    }
+                    String[] tok = entry.split("\\s+", 2);
+                    if (!"MAP".equals(tok[0]) || tok.length < 2) {
+                        read++;
+                        continue;
+                    }
+                    parseMapEntry(tok[1].strip());
+                    read++;
+                }
+                continue;
+            }
             if ("BREAK".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
                 breakTableExplicit = true;
                 int count = Integer.parseInt(parts[1]);
@@ -241,6 +339,67 @@ final class AffixManager {
                     read++;
                 }
             }
+        }
+    }
+
+    /**
+     * Mirrors {@code HashMgr::parse_reptable}: {@code ^} prefix sets type=1,
+     * {@code $} suffix sets type+=2, and any literal underscore in pattern
+     * or replacement becomes a space. Duplicate patterns coalesce so their
+     * type-specific replacement slots co-exist on the same {@link RepEntry}.
+     */
+    private void parseRepEntry(String patternRaw, String replacementRaw) {
+        String pattern = patternRaw;
+        String replacement = replacementRaw;
+        int type = 0;
+        if (pattern.startsWith("^")) {
+            type = 1;
+            pattern = pattern.substring(1);
+        }
+        if (pattern.endsWith("$")) {
+            type += 2;
+            pattern = pattern.substring(0, pattern.length() - 1);
+        }
+        pattern = pattern.replace('_', ' ');
+        replacement = replacement.replace('_', ' ');
+        RepEntry existing = null;
+        for (RepEntry candidate : repTable) {
+            if (candidate.pattern().equals(pattern)) {
+                existing = candidate;
+                break;
+            }
+        }
+        if (existing == null) {
+            existing = new RepEntry(pattern);
+            repTable.add(existing);
+        }
+        existing.setReplacement(type, replacement);
+    }
+
+    /**
+     * Mirrors {@code HashMgr::parse_maptable}. A MAP line lists an
+     * equivalence class of characters, optionally with multi-character
+     * groups wrapped in parentheses (e.g. {@code MAP ß(ss)}).
+     */
+    private void parseMapEntry(String body) {
+        List<String> units = new ArrayList<>();
+        for (int j = 0; j < body.length(); ) {
+            char ch = body.charAt(j);
+            if (ch == '(') {
+                int end = body.indexOf(')', j + 1);
+                if (end < 0) {
+                    break;
+                }
+                units.add(body.substring(j + 1, end));
+                j = end + 1;
+            } else {
+                int cp = body.codePointAt(j);
+                units.add(new String(Character.toChars(cp)));
+                j += Character.charCount(cp);
+            }
+        }
+        if (!units.isEmpty()) {
+            mapTable.add(new MapEntry(units));
         }
     }
 

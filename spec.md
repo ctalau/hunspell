@@ -340,6 +340,34 @@ Immediately scaffold the Java module layout and land a trivial passing test (ver
   the Phase 1 corpora exercise, taking the Java port from 10 to 14 ported `.good/.wrong`
   subsets with no regressions.
 
+### Milestone H — Phase 2 suggestion engine port (current session)
+**Implemented**
+- New package-private `SuggestManager` mirroring `suggestmgr.cxx` with the staged pipeline
+  in C++ order: `capchars` → `replchars` → `mapchars` → `swapchar` (plus length-4/5 double
+  swap) → `longswapchar` → `badcharkey` → `extrachar` → `forgotchar` → `movechar` →
+  `badchar` → `doubletwochars` → `twowords`.
+- `AffixManager` now parses `REP` (with `^`/`$` anchors and `_`→space conversion),
+  `MAP` (including parenthesised multi-character groups), `TRY`, `KEY`, `NOSUGGEST`,
+  `MAXNGRAMSUGS`, and `MAXCPDSUGS`. New `RepEntry` and `MapEntry` data classes mirror
+  `replentry`/`mapentry` from `htypes.hxx`.
+- `HashManager` stem parsing rewritten to preserve spaces inside stems while still
+  stripping morphological fields (`tab` separator and ` XX:` codes), matching
+  `HashMgr::load_tables` so dictionary word-pair entries like `"a lot"`, `"in spite"`,
+  and `"scot-free"` become single hash records.
+- `SimpleHunspell` exposes a `SuggestMgr::checkword`-equivalent gate that rejects
+  FORBIDDENWORD, NOSUGGEST, and bare NEEDAFFIX-only stems so staged suggestions are
+  filtered exactly the way C++ Hunspell filters its own candidates.
+- `replchars` carries the `outstrings[4]` context-type fallback chain and the
+  space-split suggestion-rewriting path; `twowords` promotes dictionary word-pair and
+  dashed-pair hits via `SPELL_BEST_SUG`, clearing inferior stages before front-inserting
+  the pair.
+
+**Contribution**
+- Closes Phase 2 of `plan.md` for the stated exit-criteria scope: the `sug`, `sug2`,
+  `map`, and `rep` fixtures now have Java coverage for their key `.sug` golden
+  expectations, taking the Java port from 14 to 18 ported `.good/.wrong/.sug` subsets
+  with no regressions.
+
 ### Current parity snapshot
 - Original C++ target corpus: **140 tests**.
 - Ported/passing Java fixture coverage (meaningful subsets or full-file assertions where implemented):
@@ -357,5 +385,9 @@ Immediately scaffold the Java module layout and land a trivial passing test (ver
   - `needaffix.dic`
   - `forbiddenword.dic`
   - `break.dic`
+  - `sug.dic`
+  - `sug2.dic`
+  - `map.dic`
+  - `rep.dic`
 
 ---

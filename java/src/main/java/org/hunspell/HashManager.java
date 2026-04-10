@@ -131,10 +131,52 @@ final class HashManager {
         return line;
     }
 
+    /**
+     * Strip morphological fields off a dictionary line, matching the C++
+     * {@code HashMgr::load_tables} detection: either a tab (the legacy morph
+     * separator) or a whitespace-preceded three-character code followed by
+     * {@code ':'} (e.g. {@code "a lot ph:alot"}).
+     */
+    private static String stripMorphFields(String line) {
+        int tab = line.indexOf('\t');
+        int dp = -1;
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) != ':') {
+                continue;
+            }
+            if (i >= 4) {
+                char sep = line.charAt(i - 4);
+                if (sep == ' ' || sep == '\t') {
+                    int end = i - 4;
+                    while (end > 0 && (line.charAt(end - 1) == ' ' || line.charAt(end - 1) == '\t')) {
+                        end--;
+                    }
+                    dp = end;
+                    break;
+                }
+            }
+        }
+        int cut = line.length();
+        if (tab >= 0) {
+            cut = Math.min(cut, tab);
+        }
+        if (dp >= 0) {
+            cut = Math.min(cut, dp);
+        }
+        return line.substring(0, cut);
+    }
+
     private static String parseStem(String line) {
         if ("/".equals(line)) {
             return "/";
         }
+        // Stem terminators mirror C++ HashMgr::load_tables: morphological
+        // field separator (tab or `[space]XX:`) and unescaped slash. Spaces
+        // are preserved inside the stem so dictionary word pairs like
+        // "a lot", "in spite", and "scot-free" load as single hash entries,
+        // which is required for `twowords` dictionary-pair matching in the
+        // suggestion pipeline.
+        line = stripMorphFields(line);
         StringBuilder stem = new StringBuilder();
         boolean escaped = false;
         for (int i = 0; i < line.length(); i++) {
@@ -148,20 +190,26 @@ final class HashManager {
                 escaped = true;
                 continue;
             }
-            if (current == '/' || Character.isWhitespace(current)) {
+            if (current == '/') {
                 break;
             }
             stem.append(current);
         }
-        return stem.toString();
+        int end = stem.length();
+        while (end > 0 && stem.charAt(end - 1) == ' ') {
+            end--;
+        }
+        return stem.substring(0, end);
     }
 
     private static String parseFlagToken(String line) {
+        line = stripMorphFields(line);
         int slashIndex = findFirstUnescapedSlash(line);
         if (slashIndex < 0 || slashIndex + 1 >= line.length()) {
             return "";
         }
         int end = slashIndex + 1;
+        // Flag tokens run to end-of-line once morph fields have been stripped.
         while (end < line.length() && !Character.isWhitespace(line.charAt(end))) {
             end++;
         }

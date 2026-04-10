@@ -16,10 +16,10 @@ Total tests: **140**
 - [ ] `keepcase.dic`
 - [ ] `dotless_i.dic`
 - [ ] `i58202.dic`
-- [ ] `map.dic`
-- [ ] `rep.dic`
-- [ ] `sug.dic`
-- [ ] `sug2.dic`
+- [x] `map.dic` *(ported subset passing in Java: MAP-driven `mapchars` enumeration recovers `Fruhstuck`→`Frühstück` and `gross`→`groß` via the UTF-aware equivalence classes `u/ú/ü`, `o/ó/ö`, `ß/(ss)`)*
+- [x] `rep.dic` *(ported subset passing in Java: anchor-aware REP substitution and space-split promotion recover `phorm`→`form`, `fantom`→`phantom`, `vacashun`→`vacation`, `alot`→`a lot`, `un'alunno`→`un alunno`, and `foo`→`bar`)*
+- [x] `sug.dic` *(ported subset passing in Java: capchars `nasa`→`NASA`; swapchar `Ghandi`→`Gandhi`, `greatful`→`grateful`; doubletwochars `vacacation`→`vacation`; length-4/5 double-swap `ahev`→`have`, `hwihc`→`which`; REP+twowords `alot`→`a lot`, `inspite`→`in spite`+`inspire`; longswap/badchar `permenant`→`permanent`; KEY-neighbour badcharkey `permqnent`→`permanent`; FORBIDDENWORD `permanent-vacation` short-circuits suggestions)*
+- [x] `sug2.dic` *(ported subset passing in Java: dictionary word-pair stems `"a lot"`, `"in spite"`, `"scot-free"` are loaded as single hash entries (space-preserving stem parser) so `twowords` promotes `alot`→`a lot`, `inspite`→`in spite`, `scotfree`→`scot-free` via the `SPELL_BEST_SUG` path)*
 - [ ] `wordpair.dic`
 - [ ] `sugutf.dic`
 - [ ] `phone.dic`
