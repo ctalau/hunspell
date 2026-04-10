@@ -107,7 +107,7 @@ Total tests: **140**
 - [ ] `digits_in_words.dic`
 - [ ] `colons_in_words.dic`
 - [ ] `ngram_utf_fix.dic`
-- [ ] `morph.dic`
+- [x] `morph.dic` *(ported subset passing in Java: morphology API checks over `tests/morph.aff` + `tests/morph.dic` validate `analyze` (`drink`/`drinks`), `stem` (`drinks -> drink`), and `generate` model-flag inflection output (`walk` -> `walks`/`walkable`))* 
 - [ ] `1975530.dic`
 - [ ] `fullstrip.dic`
 - [ ] `iconv.dic`

@@ -86,6 +86,95 @@ final class SimpleHunspell implements Hunspell {
     }
 
     @Override
+    public List<String> analyze(String word) {
+        List<HashManager.Entry> hits = lookupEntries(word);
+        if (hits.isEmpty()) {
+            return List.of();
+        }
+        List<String> out = new ArrayList<>();
+        for (HashManager.Entry entry : hits) {
+            if (entry.morphology().isEmpty()) {
+                out.add("st:" + entry.stem());
+            } else {
+                out.add(String.join(" ", entry.morphology()));
+            }
+        }
+        return Collections.unmodifiableList(out);
+    }
+
+    @Override
+    public List<String> stem(String word) {
+        List<HashManager.Entry> hits = lookupEntries(word);
+        if (hits.isEmpty()) {
+            return List.of();
+        }
+        Set<String> stems = new LinkedHashSet<>();
+        for (HashManager.Entry entry : hits) {
+            stems.add(entry.stem());
+        }
+        return Collections.unmodifiableList(new ArrayList<>(stems));
+    }
+
+    @Override
+    public List<String> generate(String word, String modelWord) {
+        List<HashManager.Entry> models = lookupEntries(modelWord);
+        if (models.isEmpty()) {
+            return List.of();
+        }
+        Set<String> generated = new LinkedHashSet<>();
+        for (HashManager.Entry model : models) {
+            generated.addAll(affixManager.generateWords(affixManager.normalizeWord(word), model.flags()));
+        }
+        return Collections.unmodifiableList(new ArrayList<>(generated));
+    }
+
+    @Override
+    public List<String> generate2(String word, List<String> morphDescriptions) {
+        if (morphDescriptions == null || morphDescriptions.isEmpty()) {
+            return List.of(word);
+        }
+        List<HashManager.Entry> candidates = new ArrayList<>();
+        for (var bucket : hashManager.all()) {
+            candidates.addAll(bucket.getValue());
+        }
+        Set<String> generated = new LinkedHashSet<>();
+        for (String desc : morphDescriptions) {
+            for (HashManager.Entry candidate : candidates) {
+                if (candidate.morphology().contains(desc)) {
+                    generated.addAll(affixManager.generateWords(affixManager.normalizeWord(word), candidate.flags()));
+                }
+            }
+        }
+        if (generated.isEmpty()) {
+            generated.add(word);
+        }
+        return Collections.unmodifiableList(new ArrayList<>(generated));
+    }
+
+    @Override
+    public void add(String word) {
+        String normalized = affixManager.normalizeWord(word);
+        hashManager.addEntry(normalized, new int[0], List.of("st:" + normalized));
+    }
+
+    @Override
+    public void addWithAffix(String word, String modelWord) {
+        List<HashManager.Entry> models = lookupEntries(modelWord);
+        String normalized = affixManager.normalizeWord(word);
+        if (models.isEmpty()) {
+            hashManager.addEntry(normalized, new int[0], List.of("st:" + normalized));
+            return;
+        }
+        HashManager.Entry model = models.get(0);
+        hashManager.addEntry(normalized, model.flags(), model.morphology());
+    }
+
+    @Override
+    public void remove(String word) {
+        hashManager.removeEntry(affixManager.normalizeWord(word));
+    }
+
+    @Override
     public DictionaryInfo info() {
         return new DictionaryInfo(affixManager.encoding(), "java-port-dev", 0, affixManager.wordChars());
     }
@@ -204,6 +293,22 @@ final class SimpleHunspell implements Hunspell {
             return LookupResult.of(hit.stem());
         }
         return LookupResult.NONE;
+    }
+
+    private List<HashManager.Entry> lookupEntries(String word) {
+        if (word == null || word.isEmpty()) {
+            return List.of();
+        }
+        String normalized = affixManager.normalizeWord(word);
+        List<HashManager.Entry> direct = hashManager.lookup(normalized);
+        if (!direct.isEmpty()) {
+            return direct;
+        }
+        HashManager.Entry affixed = affixManager.affixCheck(normalized, hashManager);
+        if (affixed != null) {
+            return List.of(affixed);
+        }
+        return List.of();
     }
 
     /**

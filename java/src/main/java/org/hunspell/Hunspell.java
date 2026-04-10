@@ -18,6 +18,20 @@ public interface Hunspell extends AutoCloseable {
 
     int addDictionary(Path dicPath);
 
+    List<String> analyze(String word);
+
+    List<String> stem(String word);
+
+    List<String> generate(String word, String modelWord);
+
+    List<String> generate2(String word, List<String> morphDescriptions);
+
+    void add(String word);
+
+    void addWithAffix(String word, String modelWord);
+
+    void remove(String word);
+
     DictionaryInfo info();
 
     @Override

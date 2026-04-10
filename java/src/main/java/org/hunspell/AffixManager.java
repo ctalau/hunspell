@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Java port of the affix-handling subset of {@code AffixMgr} ({@code affixmgr.cxx}).
@@ -303,6 +305,48 @@ final class AffixManager {
         Map<Integer, List<AffixRule>> map = prefix ? prefixes : suffixes;
         List<AffixRule> rules = map.get(flag);
         return rules == null ? Collections.emptyList() : rules;
+    }
+
+    List<String> generateWords(String stem, int[] flags) {
+        Set<String> generated = new LinkedHashSet<>();
+        generated.add(stem);
+        List<AffixRule> prefixesForEntry = new ArrayList<>();
+        List<AffixRule> suffixesForEntry = new ArrayList<>();
+        for (int flag : flags) {
+            prefixesForEntry.addAll(rulesForFlag(flag, true));
+            suffixesForEntry.addAll(rulesForFlag(flag, false));
+        }
+        for (AffixRule p : prefixesForEntry) {
+            String prefixed = p.apply(stem);
+            if (prefixed != null) {
+                generated.add(prefixed);
+            }
+        }
+        for (AffixRule s : suffixesForEntry) {
+            String suffixed = s.apply(stem);
+            if (suffixed != null) {
+                generated.add(suffixed);
+            }
+        }
+        for (AffixRule p : prefixesForEntry) {
+            if (!p.crossProduct()) {
+                continue;
+            }
+            String prefixed = p.apply(stem);
+            if (prefixed == null) {
+                continue;
+            }
+            for (AffixRule s : suffixesForEntry) {
+                if (!s.crossProduct()) {
+                    continue;
+                }
+                String both = s.apply(prefixed);
+                if (both != null) {
+                    generated.add(both);
+                }
+            }
+        }
+        return new ArrayList<>(generated);
     }
 
     /**
