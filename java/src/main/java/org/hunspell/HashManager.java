@@ -29,10 +29,12 @@ final class HashManager {
     static final class Entry {
         private final String stem;
         private final int[] flags;
+        private final List<String> morphology;
 
-        Entry(String stem, int[] flags) {
+        Entry(String stem, int[] flags, List<String> morphology) {
             this.stem = stem;
             this.flags = flags;
+            this.morphology = morphology;
         }
 
         String stem() {
@@ -45,6 +47,10 @@ final class HashManager {
 
         boolean hasFlag(int flag) {
             return Flags.contains(flags, flag);
+        }
+
+        List<String> morphology() {
+            return morphology;
         }
     }
 
@@ -82,9 +88,10 @@ final class HashManager {
                     continue;
                 }
                 String flagToken = parseFlagToken(line);
+                List<String> morphFields = parseMorphFields(line);
                 int[] flags = Flags.decode(flagToken, flagMode);
                 String normalized = normalizer.apply(stem);
-                addEntry(normalized, flags);
+                addEntry(normalized, flags, morphFields);
                 loaded++;
             }
             return loaded;
@@ -94,7 +101,12 @@ final class HashManager {
     }
 
     void addEntry(String stem, int[] flags) {
-        entries.computeIfAbsent(stem, ignored -> new ArrayList<>(1)).add(new Entry(stem, flags));
+        addEntry(stem, flags, List.of());
+    }
+
+    void addEntry(String stem, int[] flags, List<String> morphology) {
+        entries.computeIfAbsent(stem, ignored -> new ArrayList<>(1))
+            .add(new Entry(stem, flags, List.copyOf(morphology)));
     }
 
     List<Entry> lookup(String stem) {
@@ -116,6 +128,10 @@ final class HashManager {
 
     void clear() {
         entries.clear();
+    }
+
+    boolean removeEntry(String stem) {
+        return entries.remove(stem) != null;
     }
 
     static Charset defaultCharset() {
@@ -166,6 +182,28 @@ final class HashManager {
             end++;
         }
         return line.substring(slashIndex + 1, end);
+    }
+
+    private static List<String> parseMorphFields(String line) {
+        int slashIndex = findFirstUnescapedSlash(line);
+        int start = -1;
+        if (slashIndex >= 0) {
+            start = slashIndex + 1;
+            while (start < line.length() && !Character.isWhitespace(line.charAt(start))) {
+                start++;
+            }
+        } else {
+            String stem = parseStem(line);
+            start = stem.length();
+        }
+        if (start < 0 || start >= line.length()) {
+            return List.of();
+        }
+        String tail = line.substring(start).strip();
+        if (tail.isEmpty()) {
+            return List.of();
+        }
+        return List.of(tail.split("\\s+"));
     }
 
     private static int findFirstUnescapedSlash(String text) {

@@ -132,7 +132,7 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 ---
 
 ## Phase 5: morphology + runtime mutation APIs
-**Status: ⬜ Not started**
+**Status: ✅ Completed (initial API + core behavior milestone)**
 
 ### Workstreams
 1. Public API expansion for `analyze/stem/generate/generate2` equivalents.
@@ -141,6 +141,18 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 
 ### Exit criteria
 - API and behavior parity demonstrated with newly ported morphology-focused tests.
+
+### Current progress evidence
+- Public `Hunspell` API now exposes morphology operations (`analyze`, `stem`, `generate`,
+  `generate2`) plus runtime mutation operations (`add`, `addWithAffix`, `remove`) matching
+  the Phase 5 scope in `spec.md`.
+- `HashManager` now preserves dictionary morphological fields per homonym entry instead of
+  dropping everything after the stem/flag token, enabling morphology-aware output.
+- `AffixManager` now provides flag-driven generation over prefix/suffix/cross-product rules
+  so generated forms follow the same affix tables used by spell-time lookup.
+- New Java tests using `tests/morph.aff` + `tests/morph.dic` validate analysis, stemming,
+  generation, and runtime mutation behavior; full Java test suite now passes with increased
+  passing test count vs the previous session.
 
 ---
 

@@ -149,6 +149,56 @@ class HunspellBootstrapTest {
         }
     }
 
+    @Test
+    void analyzeReturnsMorphologyForDirectAndDerivedWords() {
+        Path affix = Path.of("..", "tests", "morph.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "morph.dic").normalize();
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            assertIterableEquals(List.of("po:noun", "po:verb al:drank al:drunk ts:present"), hunspell.analyze("drink"));
+            assertIterableEquals(List.of("po:noun"), hunspell.analyze("drinks"));
+        }
+    }
+
+    @Test
+    void stemReturnsRootForAffixedWord() {
+        Path affix = Path.of("..", "tests", "morph.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "morph.dic").normalize();
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            assertIterableEquals(List.of("drink"), hunspell.stem("drinks"));
+        }
+    }
+
+    @Test
+    void generateUsesModelFlagsToProduceInflections() {
+        Path affix = Path.of("..", "tests", "morph.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "morph.dic").normalize();
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            List<String> generated = hunspell.generate("walk", "drink");
+            assertTrue(generated.contains("walk"));
+            assertTrue(generated.contains("walks"));
+            assertTrue(generated.contains("walkable"));
+        }
+    }
+
+    @Test
+    void runtimeMutationSupportsAddAddWithAffixAndRemove() throws IOException {
+        Path dictionary = writeDictionary("1", "hello");
+
+        try (Hunspell hunspell = Hunspell.builder().dictionary(dictionary).build()) {
+            hunspell.add("world");
+            assertTrue(hunspell.spell("world"));
+
+            hunspell.addWithAffix("copy", "hello");
+            assertTrue(hunspell.spell("copy"));
+
+            hunspell.remove("hello");
+            assertFalse(hunspell.spell("hello"));
+        }
+    }
+
     private static Path writeDictionary(String... lines) throws IOException {
         Path file = Files.createTempFile("hunspell-java", ".dic");
         Files.write(file, String.join(System.lineSeparator(), lines).concat(System.lineSeparator()).getBytes());
