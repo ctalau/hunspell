@@ -53,6 +53,17 @@ class HunspellPortedCorpusTest {
     private static final Path BREAK_AFF = Path.of("..", "tests", "break.aff").normalize();
     private static final Path BREAK_DIC = Path.of("..", "tests", "break.dic").normalize();
     private static final Path BREAK_WRONG = Path.of("..", "tests", "break.wrong").normalize();
+    private static final Path ONLYINCOMPOUND_AFF = Path.of("..", "tests", "onlyincompound.aff").normalize();
+    private static final Path ONLYINCOMPOUND_DIC = Path.of("..", "tests", "onlyincompound.dic").normalize();
+    private static final Path ONLYINCOMPOUND_GOOD = Path.of("..", "tests", "onlyincompound.good").normalize();
+    private static final Path ONLYINCOMPOUND_WRONG = Path.of("..", "tests", "onlyincompound.wrong").normalize();
+    private static final Path COMPOUNDRULE_AFF = Path.of("..", "tests", "compoundrule.aff").normalize();
+    private static final Path COMPOUNDRULE_DIC = Path.of("..", "tests", "compoundrule.dic").normalize();
+    private static final Path COMPOUNDRULE_GOOD = Path.of("..", "tests", "compoundrule.good").normalize();
+    private static final Path COMPOUNDRULE_WRONG = Path.of("..", "tests", "compoundrule.wrong").normalize();
+    private static final Path IGNOREUTF_AFF = Path.of("..", "tests", "ignoreutf.aff").normalize();
+    private static final Path IGNOREUTF_DIC = Path.of("..", "tests", "ignoreutf.dic").normalize();
+    private static final Path IGNOREUTF_GOOD = Path.of("..", "tests", "ignoreutf.good").normalize();
 
     @Test
     void conditionGood_ofosuf1_isAccepted() {
@@ -404,6 +415,31 @@ class HunspellPortedCorpusTest {
     @Test
     void breakCorpusWrong_allForbiddenFormsRejected() {
         assertAllRejected(BREAK_AFF, BREAK_DIC, BREAK_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void onlyInCompoundCorpusGood_allWordsAccepted() {
+        assertAllAccepted(ONLYINCOMPOUND_AFF, ONLYINCOMPOUND_DIC, ONLYINCOMPOUND_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void onlyInCompoundCorpusWrong_allWordsRejected() {
+        assertAllRejected(ONLYINCOMPOUND_AFF, ONLYINCOMPOUND_DIC, ONLYINCOMPOUND_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void compoundRuleCorpusGood_allWordsAccepted() {
+        assertAllAccepted(COMPOUNDRULE_AFF, COMPOUNDRULE_DIC, COMPOUNDRULE_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void compoundRuleCorpusWrong_allWordsRejected() {
+        assertAllRejected(COMPOUNDRULE_AFF, COMPOUNDRULE_DIC, COMPOUNDRULE_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void ignoreUtfCorpusGood_allWordsAccepted() {
+        assertAllAccepted(IGNOREUTF_AFF, IGNOREUTF_DIC, IGNOREUTF_GOOD, StandardCharsets.UTF_8);
     }
 
     private static void assertConditionAccepted(String word) {

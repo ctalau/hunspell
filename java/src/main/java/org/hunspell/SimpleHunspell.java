@@ -106,12 +106,15 @@ final class SimpleHunspell implements Hunspell {
         if (word == null || word.isEmpty()) {
             return null;
         }
-        LookupResult direct = lookupVariant(word);
+        LookupResult direct = lookupVariant(word, /*inCompound=*/ false);
         if (direct.accepted()) {
             return direct.stem();
         }
         if (direct.forbidden()) {
             return null;
+        }
+        if (compoundCheck(word)) {
+            return word;
         }
         if (spellBreak(word, /*depth=*/ 0)) {
             return word;
@@ -125,18 +128,18 @@ final class SimpleHunspell implements Hunspell {
         }
         if (isTitleCase(word)) {
             String lower = word.toLowerCase(Locale.ROOT);
-            LookupResult lr = lookupVariant(lower);
+            LookupResult lr = lookupVariant(lower, /*inCompound=*/ false);
             if (lr.accepted()) {
                 return lr.stem();
             }
         } else if (isAllUpper(word)) {
             String lower = word.toLowerCase(Locale.ROOT);
-            LookupResult lr = lookupVariant(lower);
+            LookupResult lr = lookupVariant(lower, /*inCompound=*/ false);
             if (lr.accepted()) {
                 return lr.stem();
             }
             String capitalized = capitalize(lower);
-            lr = lookupVariant(capitalized);
+            lr = lookupVariant(capitalized, /*inCompound=*/ false);
             if (lr.accepted()) {
                 return lr.stem();
             }
@@ -158,10 +161,11 @@ final class SimpleHunspell implements Hunspell {
         }
     }
 
-    private LookupResult lookupVariant(String word) {
+    private LookupResult lookupVariant(String word, boolean inCompound) {
         String normalized = affixManager.normalizeWord(word);
         int forbiddenFlag = affixManager.forbiddenWordFlag();
         int needAffixFlag = affixManager.needAffixFlag();
+        int onlyInCompoundFlag = affixManager.onlyInCompoundFlag();
 
         List<HashManager.Entry> direct = hashManager.lookup(normalized);
         if (!direct.isEmpty()) {
@@ -174,6 +178,9 @@ final class SimpleHunspell implements Hunspell {
                 }
                 if (needAffixFlag >= 0 && entry.hasFlag(needAffixFlag)) {
                     // Stem is marked needaffix; skip direct acceptance but still try derivations.
+                    continue;
+                }
+                if (!inCompound && onlyInCompoundFlag >= 0 && entry.hasFlag(onlyInCompoundFlag)) {
                     continue;
                 }
                 return LookupResult.of(entry.stem());
@@ -191,9 +198,101 @@ final class SimpleHunspell implements Hunspell {
             if (forbiddenFlag >= 0 && hit.hasFlag(forbiddenFlag)) {
                 return LookupResult.FORBIDDEN;
             }
+            if (!inCompound && onlyInCompoundFlag >= 0 && hit.hasFlag(onlyInCompoundFlag)) {
+                return LookupResult.NONE;
+            }
             return LookupResult.of(hit.stem());
         }
         return LookupResult.NONE;
+    }
+
+    /**
+     * Minimal compound checker for COMPOUNDFLAG/COMPOUNDRULE/ONLYINCOMPOUND suites.
+     * Segments are matched using the same direct+affix lookup path as spell(),
+     * but each part must carry a compound-permitting flag and rule sequences
+     * (when declared) must match at least one COMPOUNDRULE pattern.
+     */
+    private boolean compoundCheck(String word) {
+        int min = affixManager.compoundMin();
+        if (word.length() < min * 2) {
+            return false;
+        }
+        return compoundCheckFrom(word, 0, min, new ArrayList<>());
+    }
+
+    private boolean compoundCheckFrom(String word, int offset, int min,
+                                      List<int[]> sequence) {
+        for (int split = offset + min; split <= word.length(); split++) {
+            String segment = word.substring(offset, split);
+            List<int[]> flagsForSegment = compoundFlagsForSegment(segment);
+            if (flagsForSegment.isEmpty()) {
+                continue;
+            }
+            for (int[] flags : flagsForSegment) {
+                sequence.add(flags);
+                if (split == word.length()) {
+                    if (sequence.size() >= 2 && sequenceMatchesRules(sequence)) {
+                        return true;
+                    }
+                } else if (word.length() - split >= min && compoundCheckFrom(word, split, min, sequence)) {
+                    return true;
+                }
+                sequence.remove(sequence.size() - 1);
+            }
+        }
+        return false;
+    }
+
+    private List<int[]> compoundFlagsForSegment(String segment) {
+        String normalized = affixManager.normalizeWord(segment);
+        int forbiddenFlag = affixManager.forbiddenWordFlag();
+        int needAffixFlag = affixManager.needAffixFlag();
+        int compoundFlag = affixManager.compoundFlag();
+        List<int[]> hits = new ArrayList<>();
+        for (HashManager.Entry entry : hashManager.lookup(normalized)) {
+            if (forbiddenFlag >= 0 && entry.hasFlag(forbiddenFlag)) {
+                continue;
+            }
+            if (needAffixFlag >= 0 && entry.hasFlag(needAffixFlag)) {
+                continue;
+            }
+            if (compoundFlag >= 0 && !entry.hasFlag(compoundFlag)) {
+                continue;
+            }
+            hits.add(entry.flags());
+        }
+        HashManager.Entry affixed = affixManager.affixCheck(normalized, hashManager);
+        if (affixed != null) {
+            if ((forbiddenFlag < 0 || !affixed.hasFlag(forbiddenFlag))
+                && (needAffixFlag < 0 || !affixed.hasFlag(needAffixFlag))
+                && (compoundFlag < 0 || affixed.hasFlag(compoundFlag))) {
+                hits.add(affixed.flags());
+            }
+        }
+        return hits;
+    }
+
+    private boolean sequenceMatchesRules(List<int[]> sequence) {
+        List<int[]> rules = affixManager.compoundRules();
+        if (rules.isEmpty()) {
+            return true;
+        }
+        for (int[] rule : rules) {
+            if (rule.length != sequence.size()) {
+                continue;
+            }
+            boolean allMatched = true;
+            for (int i = 0; i < rule.length; i++) {
+                if (!Flags.contains(sequence.get(i), rule[i])) {
+                    allMatched = false;
+                    break;
+                }
+            }
+            if (allMatched) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -262,7 +361,7 @@ final class SimpleHunspell implements Hunspell {
         if (segment.isEmpty()) {
             return false;
         }
-        LookupResult direct = lookupVariant(segment);
+        LookupResult direct = lookupVariant(segment, /*inCompound=*/ false);
         if (direct.accepted()) {
             return true;
         }
@@ -273,17 +372,17 @@ final class SimpleHunspell implements Hunspell {
             return true;
         }
         if (isTitleCase(segment)) {
-            LookupResult lr = lookupVariant(segment.toLowerCase(Locale.ROOT));
+            LookupResult lr = lookupVariant(segment.toLowerCase(Locale.ROOT), /*inCompound=*/ false);
             if (lr.accepted()) {
                 return true;
             }
         } else if (isAllUpper(segment)) {
             String lower = segment.toLowerCase(Locale.ROOT);
-            LookupResult lr = lookupVariant(lower);
+            LookupResult lr = lookupVariant(lower, /*inCompound=*/ false);
             if (lr.accepted()) {
                 return true;
             }
-            lr = lookupVariant(capitalize(lower));
+            lr = lookupVariant(capitalize(lower), /*inCompound=*/ false);
             if (lr.accepted()) {
                 return true;
             }
