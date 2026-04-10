@@ -4,12 +4,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Façade implementation of {@link Hunspell} that wires together the manager
@@ -27,11 +24,60 @@ final class SimpleHunspell implements Hunspell {
     private final AffixManager affixManager;
     private final HashManager hashManager;
     private final int maxSuggestions;
+    private final SuggestManager suggestManager;
 
     private SimpleHunspell(AffixManager affixManager, HashManager hashManager, int maxSuggestions) {
         this.affixManager = affixManager;
         this.hashManager = hashManager;
         this.maxSuggestions = maxSuggestions;
+        this.suggestManager = new SuggestManager(affixManager, this::checkSuggestion, maxSuggestions);
+    }
+
+    /**
+     * Acts as the {@code SuggestMgr::checkword} gate: a candidate is only a
+     * valid suggestion if it spell-checks and does not match any entry that
+     * is FORBIDDENWORD or NOSUGGEST. This mirrors how the C++ suggestion
+     * pipeline filters its own output.
+     */
+    private boolean checkSuggestion(String candidate) {
+        if (candidate == null || candidate.isEmpty()) {
+            return false;
+        }
+        String normalized = affixManager.normalizeWord(candidate);
+        int forbiddenFlag = affixManager.forbiddenWordFlag();
+        int needAffixFlag = affixManager.needAffixFlag();
+        int nosuggestFlag = affixManager.nosuggestFlag();
+        List<HashManager.Entry> direct = hashManager.lookup(normalized);
+        boolean sawForbidden = false;
+        if (!direct.isEmpty()) {
+            for (HashManager.Entry entry : direct) {
+                if (forbiddenFlag >= 0 && entry.hasFlag(forbiddenFlag)) {
+                    sawForbidden = true;
+                    continue;
+                }
+                if (nosuggestFlag >= 0 && entry.hasFlag(nosuggestFlag)) {
+                    continue;
+                }
+                if (needAffixFlag >= 0 && entry.hasFlag(needAffixFlag)) {
+                    continue;
+                }
+                return true;
+            }
+            if (sawForbidden) {
+                return false;
+            }
+        }
+        HashManager.Entry hit = affixManager.affixCheck(normalized, hashManager);
+        if (hit == null) {
+            return false;
+        }
+        if (forbiddenFlag >= 0 && hit.hasFlag(forbiddenFlag)) {
+            return false;
+        }
+        if (nosuggestFlag >= 0 && hit.hasFlag(nosuggestFlag)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -48,21 +94,14 @@ final class SimpleHunspell implements Hunspell {
 
     @Override
     public List<String> suggest(String word) {
-        // The current suggestion ranking is intentionally simple (Levenshtein over
-        // the loaded stems plus their visible derived forms) until the parity-grade
-        // SuggestManager port lands. This still preserves API contract.
-        Set<String> candidates = new LinkedHashSet<>();
-        for (var bucket : hashManager.all()) {
-            candidates.add(bucket.getKey());
+        if (word == null || word.isEmpty()) {
+            return List.of();
         }
-        List<String> ranked = new ArrayList<>(candidates);
-        ranked.sort(Comparator
-            .comparingInt((String candidate) -> distance(word, candidate))
-            .thenComparing(Comparator.naturalOrder()));
-        if (ranked.size() > maxSuggestions) {
-            ranked = ranked.subList(0, maxSuggestions);
+        // Short-circuit: if the word is already accepted, there's nothing to suggest.
+        if (spell(word)) {
+            return List.of();
         }
-        return Collections.unmodifiableList(ranked);
+        return suggestManager.suggest(word);
     }
 
     @Override
@@ -289,25 +328,6 @@ final class SimpleHunspell implements Hunspell {
             }
         }
         return false;
-    }
-
-    private static int distance(String left, String right) {
-        int[][] dp = new int[left.length() + 1][right.length() + 1];
-        for (int i = 0; i <= left.length(); i++) {
-            dp[i][0] = i;
-        }
-        for (int j = 0; j <= right.length(); j++) {
-            dp[0][j] = j;
-        }
-        for (int i = 1; i <= left.length(); i++) {
-            for (int j = 1; j <= right.length(); j++) {
-                int substitutionCost = left.charAt(i - 1) == right.charAt(j - 1) ? 0 : 1;
-                dp[i][j] = Math.min(
-                    Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1),
-                    dp[i - 1][j - 1] + substitutionCost);
-            }
-        }
-        return dp[left.length()][right.length()];
     }
 
     private static String stripTrailingDots(String word) {

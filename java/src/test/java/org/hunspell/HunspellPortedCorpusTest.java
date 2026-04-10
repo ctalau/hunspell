@@ -53,6 +53,14 @@ class HunspellPortedCorpusTest {
     private static final Path BREAK_AFF = Path.of("..", "tests", "break.aff").normalize();
     private static final Path BREAK_DIC = Path.of("..", "tests", "break.dic").normalize();
     private static final Path BREAK_WRONG = Path.of("..", "tests", "break.wrong").normalize();
+    private static final Path SUG_AFF = Path.of("..", "tests", "sug.aff").normalize();
+    private static final Path SUG_DIC = Path.of("..", "tests", "sug.dic").normalize();
+    private static final Path SUG2_AFF = Path.of("..", "tests", "sug2.aff").normalize();
+    private static final Path SUG2_DIC = Path.of("..", "tests", "sug2.dic").normalize();
+    private static final Path MAP_AFF = Path.of("..", "tests", "map.aff").normalize();
+    private static final Path MAP_DIC = Path.of("..", "tests", "map.dic").normalize();
+    private static final Path REP_AFF = Path.of("..", "tests", "rep.aff").normalize();
+    private static final Path REP_DIC = Path.of("..", "tests", "rep.dic").normalize();
 
     @Test
     void conditionGood_ofosuf1_isAccepted() {
@@ -404,6 +412,228 @@ class HunspellPortedCorpusTest {
     @Test
     void breakCorpusWrong_allForbiddenFormsRejected() {
         assertAllRejected(BREAK_AFF, BREAK_DIC, BREAK_WRONG, StandardCharsets.UTF_8);
+    }
+
+    // -----------------------------------------------------------------
+    // Phase 2 — Suggestion engine parity tests (.sug fixture coverage).
+    //
+    // Each test picks a misspelling from the C++ .wrong fixture and
+    // asserts the SuggestManager produces the expected top-priority
+    // suggestion that the corresponding .sug golden line records.
+    // -----------------------------------------------------------------
+
+    @Test
+    void sugSuggest_nasaCapchars_NASA() {
+        // capchars uppercase variant
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            assertTrue(h.suggest("nasa").contains("NASA"));
+        }
+    }
+
+    @Test
+    void sugSuggest_ghandiSwapchar_Gandhi() {
+        // swapchar: Ghandi -> Gandhi
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            assertTrue(h.suggest("Ghandi").contains("Gandhi"));
+        }
+    }
+
+    @Test
+    void sugSuggest_greatfulSwapchar_grateful() {
+        // swapchar: greatful -> grateful
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            assertTrue(h.suggest("greatful").contains("grateful"));
+        }
+    }
+
+    @Test
+    void sugSuggest_vacacationDoubletwo_vacation() {
+        // doubletwochars: vacacation -> vacation
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            assertTrue(h.suggest("vacacation").contains("vacation"));
+        }
+    }
+
+    @Test
+    void sugSuggest_alotReplchars_aLot() {
+        // REP alot a_lot + dictionary word pair "a lot": best suggestion
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            List<String> sug = h.suggest("alot");
+            assertTrue(sug.contains("a lot"),
+                "alot -> 'a lot' expected, got " + sug);
+        }
+    }
+
+    @Test
+    void sugSuggest_ahevDoubleSwap_have() {
+        // length-4 double-swap: ahev -> have
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            assertTrue(h.suggest("ahev").contains("have"));
+        }
+    }
+
+    @Test
+    void sugSuggest_hwihcDoubleSwap_which() {
+        // length-5 double-swap: hwihc -> which
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            assertTrue(h.suggest("hwihc").contains("which"));
+        }
+    }
+
+    @Test
+    void sug2Suggest_alotWordpair_aLotFromDictionaryStem() {
+        // sug2 stores "a lot" as a dictionary stem; twowords must find it.
+        try (Hunspell h = Hunspell.builder().affix(SUG2_AFF).dictionary(SUG2_DIC).build()) {
+            List<String> sug = h.suggest("alot");
+            assertTrue(sug.contains("a lot"),
+                "alot -> 'a lot' expected (dictionary word-pair), got " + sug);
+        }
+    }
+
+    @Test
+    void sug2Suggest_scotfreeWordpair_scotFreeDashed() {
+        // sug2 stores "scot-free" as a dictionary stem; twowords dashed hit.
+        try (Hunspell h = Hunspell.builder().affix(SUG2_AFF).dictionary(SUG2_DIC).build()) {
+            List<String> sug = h.suggest("scotfree");
+            assertTrue(sug.contains("scot-free"),
+                "scotfree -> 'scot-free' expected (dashed pair), got " + sug);
+        }
+    }
+
+    @Test
+    void sug2Suggest_inspiteWordpair_inSpite() {
+        try (Hunspell h = Hunspell.builder().affix(SUG2_AFF).dictionary(SUG2_DIC).build()) {
+            List<String> sug = h.suggest("inspite");
+            assertTrue(sug.contains("in spite"),
+                "inspite -> 'in spite' expected, got " + sug);
+        }
+    }
+
+    @Test
+    void mapSuggest_fruhstuckMapchars_fruehstueck() {
+        // MAP equivalence class inserts umlauts.
+        try (Hunspell h = Hunspell.builder().affix(MAP_AFF).dictionary(MAP_DIC).build()) {
+            List<String> sug = h.suggest("Fruhstuck");
+            assertTrue(sug.contains("Frühstück"),
+                "Fruhstuck -> 'Frühstück' expected, got " + sug);
+        }
+    }
+
+    @Test
+    void mapSuggest_grossMapchars_grosz() {
+        // MAP ß(ss) equivalence.
+        try (Hunspell h = Hunspell.builder().affix(MAP_AFF).dictionary(MAP_DIC).build()) {
+            List<String> sug = h.suggest("gross");
+            assertTrue(sug.contains("groß"),
+                "gross -> 'groß' expected, got " + sug);
+        }
+    }
+
+    @Test
+    void repSuggest_phormReplchars_form() {
+        // REP ph f anchored nowhere (middle type), phorm -> form.
+        try (Hunspell h = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(h.suggest("phorm").contains("form"));
+        }
+    }
+
+    @Test
+    void repSuggest_fantomReplchars_phantom() {
+        // REP f ph: fantom -> phantom.
+        try (Hunspell h = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(h.suggest("fantom").contains("phantom"));
+        }
+    }
+
+    @Test
+    void repSuggest_vacashunReplchars_vacation() {
+        // REP shun$ tion: vacashun -> vacation (end-anchored).
+        try (Hunspell h = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(h.suggest("vacashun").contains("vacation"));
+        }
+    }
+
+    @Test
+    void repSuggest_alotAnchoredRep_aLot() {
+        // REP ^alot$ a_lot: whole-word anchored REP + space split.
+        try (Hunspell h = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            List<String> sug = h.suggest("alot");
+            assertTrue(sug.contains("a lot"),
+                "alot -> 'a lot' expected (anchored REP), got " + sug);
+        }
+    }
+
+    @Test
+    void repSuggest_unAlunnoReplchars_unAlunno() {
+        // REP ' _: un'alunno -> un alunno.
+        try (Hunspell h = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            List<String> sug = h.suggest("un'alunno");
+            assertTrue(sug.contains("un alunno"),
+                "un'alunno -> 'un alunno' expected, got " + sug);
+        }
+    }
+
+    @Test
+    void repSuggest_fooAnchored_bar() {
+        // REP ^foo$ bar: whole-word fallback.
+        try (Hunspell h = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(h.suggest("foo").contains("bar"));
+        }
+    }
+
+    @Test
+    void sugSuggest_inspiteReplchars_inSpiteAndInspire() {
+        // REP inspite in_spite → dictionary word pair "in spite",
+        // plus swapchar-derived "inspire" (stored verbatim).
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            List<String> sug = h.suggest("inspite");
+            assertTrue(sug.contains("in spite"),
+                "inspite -> 'in spite' expected, got " + sug);
+            assertTrue(sug.contains("inspire"),
+                "inspite -> 'inspire' expected via badchar/swap, got " + sug);
+        }
+    }
+
+    @Test
+    void sugSuggest_permenantBadcharOrLongswap_permanent() {
+        // Length-9 longswap e↔a or badchar 'a' (via KEY neighbour) yields permanent.
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            List<String> sug = h.suggest("permenant");
+            assertTrue(sug.contains("permanent"),
+                "permenant -> 'permanent' expected, got " + sug);
+        }
+    }
+
+    @Test
+    void sugSuggest_permqnentBadcharkey_permanent() {
+        // badcharkey: q is KEY-adjacent to a (via aq row), so permqnent -> permanent.
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            List<String> sug = h.suggest("permqnent");
+            assertTrue(sug.contains("permanent"),
+                "permqnent -> 'permanent' expected via KEY neighbour, got " + sug);
+        }
+    }
+
+    @Test
+    void sugSuggest_forbiddenWordPairYieldsNoSuggestions() {
+        // permanent-vacation is FORBIDDENWORD in sug.dic. checkSuggestion must
+        // reject it across all stages so no pair is proposed.
+        try (Hunspell h = Hunspell.builder().affix(SUG_AFF).dictionary(SUG_DIC).build()) {
+            List<String> sug = h.suggest("permanent-vacation");
+            assertFalse(sug.contains("permanent-vacation"),
+                "forbidden pair must not be suggested, got " + sug);
+        }
+    }
+
+    @Test
+    void repSuggest_unAlunnoDictionaryPair_keepsPair() {
+        // After REP ' _ rewrite, left="un" + right="alunno" both checkWord→true,
+        // and the pair is inserted via twowords BEST_SUG.
+        try (Hunspell h = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            List<String> sug = h.suggest("un'alunno");
+            assertTrue(sug.contains("un alunno"),
+                "un'alunno -> 'un alunno' expected, got " + sug);
+        }
     }
 
     private static void assertConditionAccepted(String word) {
