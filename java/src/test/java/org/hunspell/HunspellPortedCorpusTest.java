@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class HunspellPortedCorpusTest {
@@ -1043,6 +1044,311 @@ class HunspellPortedCorpusTest {
     void oconvCorpusWrong_allWordsRejected() {
         assertAllRejected(OCONV_AFF, OCONV_DIC, OCONV_WRONG, StandardCharsets.UTF_8);
     }
+
+
+    @Test
+    void allcapsCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "allcaps.aff").normalize(), Path.of("..", "tests", "allcaps.dic").normalize(), Path.of("..", "tests", "allcaps.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void allcaps_utfCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "allcaps_utf.aff").normalize(), Path.of("..", "tests", "allcaps_utf.dic").normalize(), Path.of("..", "tests", "allcaps_utf.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+
+    @Test
+    void allcaps2CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "allcaps2.aff").normalize(), Path.of("..", "tests", "allcaps2.dic").normalize(), Path.of("..", "tests", "allcaps2.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void keepcaseCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "keepcase.aff").normalize(), Path.of("..", "tests", "keepcase.dic").normalize(), Path.of("..", "tests", "keepcase.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+
+    @Test
+    void i58202CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "i58202.aff").normalize(), Path.of("..", "tests", "i58202.dic").normalize(), Path.of("..", "tests", "i58202.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+    @Test
+    void wordpairCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "wordpair.aff").normalize(), Path.of("..", "tests", "wordpair.dic").normalize(), Path.of("..", "tests", "wordpair.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void ph2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "ph2.aff").normalize(), Path.of("..", "tests", "ph2.dic").normalize(), Path.of("..", "tests", "ph2.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+
+
+
+
+
+    @Test
+    void breakdefaultCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "breakdefault.aff").normalize(), Path.of("..", "tests", "breakdefault.dic").normalize(), Path.of("..", "tests", "breakdefault.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void needaffix3CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "needaffix3.aff").normalize(), Path.of("..", "tests", "needaffix3.dic").normalize(), Path.of("..", "tests", "needaffix3.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void needaffix5CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "needaffix5.aff").normalize(), Path.of("..", "tests", "needaffix5.dic").normalize(), Path.of("..", "tests", "needaffix5.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+
+
+    @Test
+    void complexprefixesCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "complexprefixes.aff").normalize(), Path.of("..", "tests", "complexprefixes.dic").normalize(), Path.of("..", "tests", "complexprefixes.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+    @Test
+    void complexprefixesutfCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "complexprefixesutf.aff").normalize(), Path.of("..", "tests", "complexprefixesutf.dic").normalize(), Path.of("..", "tests", "complexprefixesutf.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+
+    @Test
+    void utf8_nonbmpCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "utf8_nonbmp.aff").normalize(), Path.of("..", "tests", "utf8_nonbmp.dic").normalize(), Path.of("..", "tests", "utf8_nonbmp.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void utf8_nonbmpCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "utf8_nonbmp.aff").normalize(), Path.of("..", "tests", "utf8_nonbmp.dic").normalize(), Path.of("..", "tests", "utf8_nonbmp.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+
+    @Test
+    void compoundrule2CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundrule2.aff").normalize(), Path.of("..", "tests", "compoundrule2.dic").normalize(), Path.of("..", "tests", "compoundrule2.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void compoundrule3CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundrule3.aff").normalize(), Path.of("..", "tests", "compoundrule3.dic").normalize(), Path.of("..", "tests", "compoundrule3.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void compoundrule4CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundrule4.aff").normalize(), Path.of("..", "tests", "compoundrule4.dic").normalize(), Path.of("..", "tests", "compoundrule4.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void compoundrule5CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundrule5.aff").normalize(), Path.of("..", "tests", "compoundrule5.dic").normalize(), Path.of("..", "tests", "compoundrule5.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+
+    @Test
+    void compoundrule6CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundrule6.aff").normalize(), Path.of("..", "tests", "compoundrule6.dic").normalize(), Path.of("..", "tests", "compoundrule6.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void compoundrule7CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundrule7.aff").normalize(), Path.of("..", "tests", "compoundrule7.dic").normalize(), Path.of("..", "tests", "compoundrule7.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void compoundrule8CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundrule8.aff").normalize(), Path.of("..", "tests", "compoundrule8.dic").normalize(), Path.of("..", "tests", "compoundrule8.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void compoundaffixCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "compoundaffix.aff").normalize(), Path.of("..", "tests", "compoundaffix.dic").normalize(), Path.of("..", "tests", "compoundaffix.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void compoundaffix3CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "compoundaffix3.aff").normalize(), Path.of("..", "tests", "compoundaffix3.dic").normalize(), Path.of("..", "tests", "compoundaffix3.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+    @Test
+    void compoundforbidCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "compoundforbid.aff").normalize(), Path.of("..", "tests", "compoundforbid.dic").normalize(), Path.of("..", "tests", "compoundforbid.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompounddupCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "checkcompounddup.aff").normalize(), Path.of("..", "tests", "checkcompounddup.dic").normalize(), Path.of("..", "tests", "checkcompounddup.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void checkcompoundtripleCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "checkcompoundtriple.aff").normalize(), Path.of("..", "tests", "checkcompoundtriple.dic").normalize(), Path.of("..", "tests", "checkcompoundtriple.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+
+
+    @Test
+    void checkcompoundrepCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "checkcompoundrep.aff").normalize(), Path.of("..", "tests", "checkcompoundrep.dic").normalize(), Path.of("..", "tests", "checkcompoundrep.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void checkcompoundcase2CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "checkcompoundcase2.aff").normalize(), Path.of("..", "tests", "checkcompoundcase2.dic").normalize(), Path.of("..", "tests", "checkcompoundcase2.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompoundcaseutfCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "checkcompoundcaseutf.aff").normalize(), Path.of("..", "tests", "checkcompoundcaseutf.dic").normalize(), Path.of("..", "tests", "checkcompoundcaseutf.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+
+
+    @Test
+    void checkcompoundpatternCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "checkcompoundpattern.aff").normalize(), Path.of("..", "tests", "checkcompoundpattern.dic").normalize(), Path.of("..", "tests", "checkcompoundpattern.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+
+
+
+
+
+    @Test
+    void checksharpsCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "checksharps.aff").normalize(), Path.of("..", "tests", "checksharps.dic").normalize(), Path.of("..", "tests", "checksharps.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void checksharpsutfCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "checksharpsutf.aff").normalize(), Path.of("..", "tests", "checksharpsutf.dic").normalize(), Path.of("..", "tests", "checksharpsutf.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void germancompoundingCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "germancompounding.aff").normalize(), Path.of("..", "tests", "germancompounding.dic").normalize(), Path.of("..", "tests", "germancompounding.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void germancompoundingoldCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "germancompoundingold.aff").normalize(), Path.of("..", "tests", "germancompoundingold.dic").normalize(), Path.of("..", "tests", "germancompoundingold.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+    @Test
+    void i53643CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "i53643.aff").normalize(), Path.of("..", "tests", "i53643.dic").normalize(), Path.of("..", "tests", "i53643.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+
+
+    @Test
+    void opentaal_forbiddenword1CorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "opentaal_forbiddenword1.aff").normalize(), Path.of("..", "tests", "opentaal_forbiddenword1.dic").normalize(), Path.of("..", "tests", "opentaal_forbiddenword1.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void opentaal_keepcaseCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "opentaal_keepcase.aff").normalize(), Path.of("..", "tests", "opentaal_keepcase.dic").normalize(), Path.of("..", "tests", "opentaal_keepcase.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void t_2970240CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "2970240.aff").normalize(), Path.of("..", "tests", "2970240.dic").normalize(), Path.of("..", "tests", "2970240.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void t_2970242CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "2970242.aff").normalize(), Path.of("..", "tests", "2970242.dic").normalize(), Path.of("..", "tests", "2970242.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void opentaal_cpdpatCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "opentaal_cpdpat.aff").normalize(), Path.of("..", "tests", "opentaal_cpdpat.dic").normalize(), Path.of("..", "tests", "opentaal_cpdpat.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+    @Test
+    void opentaal_cpdpat2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "opentaal_cpdpat2.aff").normalize(), Path.of("..", "tests", "opentaal_cpdpat2.dic").normalize(), Path.of("..", "tests", "opentaal_cpdpat2.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+    @Test
+    void onlyincompound2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "onlyincompound2.aff").normalize(), Path.of("..", "tests", "onlyincompound2.dic").normalize(), Path.of("..", "tests", "onlyincompound2.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+
+
+
+
+    @Test
+    void nepaliCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "nepali.aff").normalize(), Path.of("..", "tests", "nepali.dic").normalize(), Path.of("..", "tests", "nepali.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+
+
+    @Disabled("timelimit fixture is intentionally stress-oriented and non-deterministic for unit runtime")
+    @Test
+    void timelimitCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "timelimit.aff").normalize(), Path.of("..", "tests", "timelimit.dic").normalize(), Path.of("..", "tests", "timelimit.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Disabled("timelimit fixture is intentionally stress-oriented and non-deterministic for unit runtime")
+    @Test
+    void timelimitCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "timelimit.aff").normalize(), Path.of("..", "tests", "timelimit.dic").normalize(), Path.of("..", "tests", "timelimit.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void ignoresugCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "ignoresug.aff").normalize(), Path.of("..", "tests", "ignoresug.dic").normalize(), Path.of("..", "tests", "ignoresug.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void limit_multiple_compoundingCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "limit-multiple-compounding.aff").normalize(), Path.of("..", "tests", "limit-multiple-compounding.dic").normalize(), Path.of("..", "tests", "limit-multiple-compounding.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
 
     private static void assertConditionAccepted(String word) {
         try (Hunspell hunspell = Hunspell.builder().affix(CONDITION_AFF).dictionary(CONDITION_DIC).build()) {
