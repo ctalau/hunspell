@@ -43,7 +43,7 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 - No regressions in existing Java spell tests.
 
 ### Current progress evidence
-- Java tests validate the targeted corpora as ported subsets and pass (73 total Java tests).
+- Java tests validate the targeted corpora as ported subsets and pass (143 total Java tests).
 - `SimpleHunspell` is now a thin façade over package-private `AffixManager` (mirrors `affixmgr.cxx`)
   and `HashManager` (mirrors `hashmgr.cxx`); spell-time lookup follows the C++ control flow
   (`prefix_check` → `suffix_check` → `suffix_check_twosfx` → `prefix_check_twosfx`) instead of
@@ -113,6 +113,21 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 - Ported Java tests now pass full corpus assertions for `onlyincompound.good`/`.wrong`,
   `compoundrule.good`/`.wrong`, and `ignoreutf.good` (UTF-8 Arabic IGNORE normalization), extending
   phase-3 coverage beyond prior condition-only UTF checks.
+- Additional phase-3/edge-regression corpus ports now pass in Java for `checkcompoundrep2.good`,
+  `utfcompound.good`, `i35725.good`/`.wrong`, and `gh1076.good`/`.wrong`, plus further spell-path
+  parity suites `needaffix2.good`, `needaffix4.good`, `zeroaffix.good`, `fullstrip.good`,
+  `breakoff.good`/`.wrong`, and `allcaps3.good`/`.wrong`.
+- Regression/locale corpus coverage has expanded further with passing Java ports for
+  `map.wrong`, `rep.wrong`, `1592880.good`, `1695964.wrong`, `1463589.wrong`,
+  `1463589_utf.wrong`, `IJ.good`/`.wrong`, `i68568.wrong`, `i68568utf.wrong`,
+  `1706659.wrong`, `1748408-{1,2,3,4}.good`, `digits_in_words.wrong`,
+  `ngram_utf_fix.good`/`.wrong`, `1975530.good`/`.wrong`, `encoding.good`,
+  `korean.good`/`.wrong`, `opentaal_forbiddenword2.good`/`.wrong`, `arabic.wrong`,
+  and `warn.good`.
+- Additional UTF/regression parity coverage now includes passing Java ports for
+  `right_to_left_mark.good`, `i54633.good`/`.wrong`, `i54980.good`, `maputf.wrong`,
+  and `reputf.wrong`, with added direct word-level assertions for accented and
+  ligature cases plus right-to-left-mark tokens.
 
 ---
 

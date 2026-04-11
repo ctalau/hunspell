@@ -12,12 +12,12 @@ Total tests: **140**
 - [ ] `allcaps.dic`
 - [ ] `allcaps_utf.dic`
 - [ ] `allcaps2.dic`
-- [ ] `allcaps3.dic`
+- [x] `allcaps3.dic` *(ported subset passing in Java: full `allcaps3.good`/`allcaps3.wrong` corpus assertions are passing for all-caps acceptance/rejection behavior in this fixture)*
 - [ ] `keepcase.dic`
 - [ ] `dotless_i.dic`
 - [ ] `i58202.dic`
-- [ ] `map.dic`
-- [ ] `rep.dic`
+- [x] `map.dic` *(ported subset passing in Java: full `map.wrong` corpus assertions are passing for MAP-based negative acceptance checks in this fixture)*
+- [x] `rep.dic` *(ported subset passing in Java: full `rep.wrong` corpus assertions are passing for REP-based negative acceptance checks in this fixture)*
 - [ ] `sug.dic`
 - [ ] `sug2.dic`
 - [ ] `wordpair.dic`
@@ -38,9 +38,9 @@ Total tests: **140**
 - [ ] `breakdefault.dic`
 - [x] `break.dic` *(ported subset passing in Java: recursive hyphen/n-dash split acceptance (`foo-bar`, `foo–bar`, `foo-bar-foo-bar`, `e-mail-foo`) plus full `break.wrong` corpus rejection; leverages FORBIDDENWORD short-circuit for `foo-baz`)*
 - [x] `needaffix.dic` *(ported subset passing in Java: direct checks covering bare stem rejection (`foo` rejected via NEEDAFFIX flag) and affixed-form acceptance (`foos`, `bar`))*
-- [ ] `needaffix2.dic`
+- [x] `needaffix2.dic` *(ported subset passing in Java: full `needaffix2.good` corpus assertions are passing, covering NEEDAFFIX acceptance paths in this fixture)*
 - [ ] `needaffix3.dic`
-- [ ] `needaffix4.dic`
+- [x] `needaffix4.dic` *(ported subset passing in Java: full `needaffix4.good` corpus assertions are passing, covering extended NEEDAFFIX interactions in this fixture)*
 - [ ] `needaffix5.dic`
 - [ ] `circumfix.dic`
 - [ ] `fogemorpheme.dic`
@@ -49,7 +49,7 @@ Total tests: **140**
 - [ ] `complexprefixes2.dic`
 - [ ] `complexprefixesutf.dic`
 - [ ] `conditionalprefix.dic`
-- [ ] `zeroaffix.dic`
+- [x] `zeroaffix.dic` *(ported subset passing in Java: full `zeroaffix.good` corpus assertions are passing, covering zero-strip affix application acceptance)*
 - [ ] `utf8.dic`
 - [ ] `utf8_bom.dic`
 - [ ] `utf8_bom2.dic`
@@ -71,58 +71,58 @@ Total tests: **140**
 - [ ] `checkcompoundtriple.dic`
 - [ ] `simplifiedtriple.dic`
 - [ ] `checkcompoundrep.dic`
-- [ ] `checkcompoundrep2.dic`
+- [x] `checkcompoundrep2.dic` *(ported subset passing in Java: full `checkcompoundrep2.good` corpus assertions are passing for compound replacement-constraint behavior in this fixture)*
 - [ ] `checkcompoundcase2.dic`
 - [ ] `checkcompoundcaseutf.dic`
 - [ ] `checkcompoundpattern.dic`
 - [ ] `checkcompoundpattern2.dic`
 - [ ] `checkcompoundpattern3.dic`
 - [ ] `checkcompoundpattern4.dic`
-- [ ] `utfcompound.dic`
+- [x] `utfcompound.dic` *(ported subset passing in Java: full `utfcompound.good` corpus assertions are passing for UTF compound acceptance paths in this fixture)*
 - [ ] `checksharps.dic`
 - [ ] `checksharpsutf.dic`
 - [ ] `germancompounding.dic`
 - [ ] `germancompoundingold.dic`
-- [ ] `i35725.dic`
+- [x] `i35725.dic` *(ported subset passing in Java: full `i35725.good`/`i35725.wrong` corpus assertions are passing for this regression fixture)*
 - [ ] `i53643.dic`
-- [ ] `i54633.dic`
-- [ ] `i54980.dic`
-- [ ] `maputf.dic`
-- [ ] `reputf.dic`
+- [x] `i54633.dic` *(ported subset passing in Java: full `i54633.good`/`i54633.wrong` corpus assertions plus explicit accented-case direct checks (`éditer`/`Éditer` accepted; `editer`/`Editer` rejected))*
+- [x] `i54980.dic` *(ported subset passing in Java: full `i54980.good` corpus assertions plus explicit ligature direct checks (`cœur`/`œuvre`/`CŒUR`/`ŒUVRE` accepted))*
+- [x] `maputf.dic` *(ported subset passing in Java: full `maputf.wrong` corpus assertions plus explicit direct rejection checks (`Fruhstuck`, `tukorfuro`, `gross`))*
+- [x] `reputf.dic` *(ported subset passing in Java: full `reputf.wrong` corpus assertions plus explicit direct rejection check (`foo`))*
 - [x] `ignore.dic` *(ported subset passing in Java: full `ignore.good` corpus assertions plus direct checks (`example`, `expression`, `xmpl`, `xprssn`, `reexpression`, `rxprssn`) covering `IGNORE aeiou` normalization of stems, affix strip/append, and lookup input)*
 - [x] `ignoreutf.dic` *(ported subset passing in Java: full `ignoreutf.good` corpus assertions are passing with UTF-8 Arabic diacritic IGNORE normalization)*
-- [ ] `right_to_left_mark.dic`
-- [ ] `1592880.dic`
-- [ ] `1695964.dic`
-- [ ] `1463589.dic`
-- [ ] `1463589_utf.dic`
-- [ ] `IJ.dic`
-- [ ] `i68568.dic`
-- [ ] `i68568utf.dic`
-- [ ] `1706659.dic`
-- [ ] `1748408-1.dic`
-- [ ] `1748408-2.dic`
-- [ ] `1748408-3.dic`
-- [ ] `1748408-4.dic`
-- [ ] `digits_in_words.dic`
+- [x] `right_to_left_mark.dic` *(ported subset passing in Java: full `right_to_left_mark.good` corpus assertions plus explicit direct right-to-left mark token checks are passing)*
+- [x] `1592880.dic` *(ported subset passing in Java: full `1592880.good` corpus assertions are passing for this regression fixture)*
+- [x] `1695964.dic` *(ported subset passing in Java: full `1695964.wrong` corpus assertions are passing for this regression fixture)*
+- [x] `1463589.dic` *(ported subset passing in Java: full `1463589.wrong` corpus assertions are passing for this regression fixture)*
+- [x] `1463589_utf.dic` *(ported subset passing in Java: full `1463589_utf.wrong` corpus assertions are passing with UTF-8 corpus loading)*
+- [x] `IJ.dic` *(ported subset passing in Java: full `IJ.good`/`IJ.wrong` corpus assertions are passing for Dutch IJ casing regression behavior)*
+- [x] `i68568.dic` *(ported subset passing in Java: full `i68568.wrong` corpus assertions are passing for this regression fixture)*
+- [x] `i68568utf.dic` *(ported subset passing in Java: full `i68568utf.wrong` corpus assertions are passing with UTF-8 corpus loading)*
+- [x] `1706659.dic` *(ported subset passing in Java: full `1706659.wrong` corpus assertions are passing for this regression fixture)*
+- [x] `1748408-1.dic` *(ported subset passing in Java: full `1748408-1.good` corpus assertions are passing for this regression fixture)*
+- [x] `1748408-2.dic` *(ported subset passing in Java: full `1748408-2.good` corpus assertions are passing for this regression fixture)*
+- [x] `1748408-3.dic` *(ported subset passing in Java: full `1748408-3.good` corpus assertions are passing for this regression fixture)*
+- [x] `1748408-4.dic` *(ported subset passing in Java: full `1748408-4.good` corpus assertions are passing for this regression fixture)*
+- [x] `digits_in_words.dic` *(ported subset passing in Java: full `digits_in_words.wrong` corpus assertions are passing for digit-in-word rejection checks)*
 - [ ] `colons_in_words.dic`
-- [ ] `ngram_utf_fix.dic`
+- [x] `ngram_utf_fix.dic` *(ported subset passing in Java: full `ngram_utf_fix.good`/`ngram_utf_fix.wrong` corpus assertions are passing with UTF-8 corpus loading)*
 - [x] `morph.dic` *(ported subset passing in Java: morphology API checks over `tests/morph.aff` + `tests/morph.dic` validate `analyze` (`drink`/`drinks`), `stem` (`drinks -> drink`), and `generate` model-flag inflection output (`walk` -> `walks`/`walkable`))* 
-- [ ] `1975530.dic`
-- [ ] `fullstrip.dic`
+- [x] `1975530.dic` *(ported subset passing in Java: full `1975530.good`/`1975530.wrong` corpus assertions are passing with UTF-8 corpus loading for Arabic content)*
+- [x] `fullstrip.dic` *(ported subset passing in Java: full `fullstrip.good` corpus assertions are passing, covering full-strip affix behavior in this fixture)*
 - [ ] `iconv.dic`
 - [ ] `iconv2.dic`
 - [ ] `oconv.dic`
 - [ ] `oconv2.dic`
-- [ ] `encoding.dic`
-- [ ] `korean.dic`
+- [x] `encoding.dic` *(ported subset passing in Java: full `encoding.good` corpus assertions are passing with UTF-8 corpus loading for encoded ligature forms)*
+- [x] `korean.dic` *(ported subset passing in Java: full `korean.good`/`korean.wrong` corpus assertions are passing with UTF-8 corpus loading)*
 - [ ] `opentaal_forbiddenword1.dic`
-- [ ] `opentaal_forbiddenword2.dic`
+- [x] `opentaal_forbiddenword2.dic` *(ported subset passing in Java: full `opentaal_forbiddenword2.good`/`opentaal_forbiddenword2.wrong` corpus assertions are passing)*
 - [ ] `opentaal_keepcase.dic`
-- [ ] `arabic.dic`
+- [x] `arabic.dic` *(ported subset passing in Java: full `arabic.wrong` corpus assertions are passing with UTF-8 corpus loading)*
 - [ ] `2970240.dic`
 - [ ] `2970242.dic`
-- [ ] `breakoff.dic`
+- [x] `breakoff.dic` *(ported subset passing in Java: full `breakoff.good`/`breakoff.wrong` corpus assertions are passing for BREAK/OFF behavior in this fixture)*
 - [ ] `opentaal_cpdpat.dic`
 - [ ] `opentaal_cpdpat2.dic`
 - [ ] `2999225.dic`
@@ -130,12 +130,12 @@ Total tests: **140**
 - [ ] `forceucase.dic`
 - [ ] `nepali.dic`
 - [ ] `hu.dic`
-- [ ] `warn.dic`
+- [x] `warn.dic` *(ported subset passing in Java: full `warn.good` corpus assertions are passing for WARN-flag fixture behavior)*
 - [ ] `timelimit.dic`
 - [ ] `ignoresug.dic`
 - [ ] `limit-multiple-compounding.dic`
 - [ ] `iconv_break_overflow.dic`
-- [ ] `gh1076.dic`
+- [x] `gh1076.dic` *(ported subset passing in Java: full `gh1076.good`/`gh1076.wrong` corpus assertions are passing for GitHub issue #1076 regression behavior)*
 - [ ] `gh1032.test`
 - [ ] `gh1086.test`
 - [ ] `gh1018.test`

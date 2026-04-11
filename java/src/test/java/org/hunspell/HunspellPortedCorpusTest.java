@@ -64,6 +64,129 @@ class HunspellPortedCorpusTest {
     private static final Path IGNOREUTF_AFF = Path.of("..", "tests", "ignoreutf.aff").normalize();
     private static final Path IGNOREUTF_DIC = Path.of("..", "tests", "ignoreutf.dic").normalize();
     private static final Path IGNOREUTF_GOOD = Path.of("..", "tests", "ignoreutf.good").normalize();
+    private static final Path NEEDAFFIX2_AFF = Path.of("..", "tests", "needaffix2.aff").normalize();
+    private static final Path NEEDAFFIX2_DIC = Path.of("..", "tests", "needaffix2.dic").normalize();
+    private static final Path NEEDAFFIX2_GOOD = Path.of("..", "tests", "needaffix2.good").normalize();
+    private static final Path NEEDAFFIX4_AFF = Path.of("..", "tests", "needaffix4.aff").normalize();
+    private static final Path NEEDAFFIX4_DIC = Path.of("..", "tests", "needaffix4.dic").normalize();
+    private static final Path NEEDAFFIX4_GOOD = Path.of("..", "tests", "needaffix4.good").normalize();
+    private static final Path ZEROAFFIX_AFF = Path.of("..", "tests", "zeroaffix.aff").normalize();
+    private static final Path ZEROAFFIX_DIC = Path.of("..", "tests", "zeroaffix.dic").normalize();
+    private static final Path ZEROAFFIX_GOOD = Path.of("..", "tests", "zeroaffix.good").normalize();
+    private static final Path FULLSTRIP_AFF = Path.of("..", "tests", "fullstrip.aff").normalize();
+    private static final Path FULLSTRIP_DIC = Path.of("..", "tests", "fullstrip.dic").normalize();
+    private static final Path FULLSTRIP_GOOD = Path.of("..", "tests", "fullstrip.good").normalize();
+    private static final Path BREAKOFF_AFF = Path.of("..", "tests", "breakoff.aff").normalize();
+    private static final Path BREAKOFF_DIC = Path.of("..", "tests", "breakoff.dic").normalize();
+    private static final Path BREAKOFF_GOOD = Path.of("..", "tests", "breakoff.good").normalize();
+    private static final Path BREAKOFF_WRONG = Path.of("..", "tests", "breakoff.wrong").normalize();
+    private static final Path ALLCAPS3_AFF = Path.of("..", "tests", "allcaps3.aff").normalize();
+    private static final Path ALLCAPS3_DIC = Path.of("..", "tests", "allcaps3.dic").normalize();
+    private static final Path ALLCAPS3_GOOD = Path.of("..", "tests", "allcaps3.good").normalize();
+    private static final Path ALLCAPS3_WRONG = Path.of("..", "tests", "allcaps3.wrong").normalize();
+    private static final Path CHECKCOMPOUNDREP2_AFF = Path.of("..", "tests", "checkcompoundrep2.aff").normalize();
+    private static final Path CHECKCOMPOUNDREP2_DIC = Path.of("..", "tests", "checkcompoundrep2.dic").normalize();
+    private static final Path CHECKCOMPOUNDREP2_GOOD = Path.of("..", "tests", "checkcompoundrep2.good").normalize();
+    private static final Path UTFCOMPOUND_AFF = Path.of("..", "tests", "utfcompound.aff").normalize();
+    private static final Path UTFCOMPOUND_DIC = Path.of("..", "tests", "utfcompound.dic").normalize();
+    private static final Path UTFCOMPOUND_GOOD = Path.of("..", "tests", "utfcompound.good").normalize();
+    private static final Path I35725_AFF = Path.of("..", "tests", "i35725.aff").normalize();
+    private static final Path I35725_DIC = Path.of("..", "tests", "i35725.dic").normalize();
+    private static final Path I35725_GOOD = Path.of("..", "tests", "i35725.good").normalize();
+    private static final Path I35725_WRONG = Path.of("..", "tests", "i35725.wrong").normalize();
+    private static final Path GH1076_AFF = Path.of("..", "tests", "gh1076.aff").normalize();
+    private static final Path GH1076_DIC = Path.of("..", "tests", "gh1076.dic").normalize();
+    private static final Path GH1076_GOOD = Path.of("..", "tests", "gh1076.good").normalize();
+    private static final Path GH1076_WRONG = Path.of("..", "tests", "gh1076.wrong").normalize();
+    private static final Path MAP_AFF = Path.of("..", "tests", "map.aff").normalize();
+    private static final Path MAP_DIC = Path.of("..", "tests", "map.dic").normalize();
+    private static final Path MAP_WRONG = Path.of("..", "tests", "map.wrong").normalize();
+    private static final Path REP_AFF = Path.of("..", "tests", "rep.aff").normalize();
+    private static final Path REP_DIC = Path.of("..", "tests", "rep.dic").normalize();
+    private static final Path REP_WRONG = Path.of("..", "tests", "rep.wrong").normalize();
+    private static final Path I1592880_AFF = Path.of("..", "tests", "1592880.aff").normalize();
+    private static final Path I1592880_DIC = Path.of("..", "tests", "1592880.dic").normalize();
+    private static final Path I1592880_GOOD = Path.of("..", "tests", "1592880.good").normalize();
+    private static final Path I1695964_AFF = Path.of("..", "tests", "1695964.aff").normalize();
+    private static final Path I1695964_DIC = Path.of("..", "tests", "1695964.dic").normalize();
+    private static final Path I1695964_WRONG = Path.of("..", "tests", "1695964.wrong").normalize();
+    private static final Path I1463589_AFF = Path.of("..", "tests", "1463589.aff").normalize();
+    private static final Path I1463589_DIC = Path.of("..", "tests", "1463589.dic").normalize();
+    private static final Path I1463589_WRONG = Path.of("..", "tests", "1463589.wrong").normalize();
+    private static final Path I1463589_UTF_AFF = Path.of("..", "tests", "1463589_utf.aff").normalize();
+    private static final Path I1463589_UTF_DIC = Path.of("..", "tests", "1463589_utf.dic").normalize();
+    private static final Path I1463589_UTF_WRONG = Path.of("..", "tests", "1463589_utf.wrong").normalize();
+    private static final Path IJ_AFF = Path.of("..", "tests", "IJ.aff").normalize();
+    private static final Path IJ_DIC = Path.of("..", "tests", "IJ.dic").normalize();
+    private static final Path IJ_GOOD = Path.of("..", "tests", "IJ.good").normalize();
+    private static final Path IJ_WRONG = Path.of("..", "tests", "IJ.wrong").normalize();
+    private static final Path I68568_AFF = Path.of("..", "tests", "i68568.aff").normalize();
+    private static final Path I68568_DIC = Path.of("..", "tests", "i68568.dic").normalize();
+    private static final Path I68568_WRONG = Path.of("..", "tests", "i68568.wrong").normalize();
+    private static final Path I68568UTF_AFF = Path.of("..", "tests", "i68568utf.aff").normalize();
+    private static final Path I68568UTF_DIC = Path.of("..", "tests", "i68568utf.dic").normalize();
+    private static final Path I68568UTF_WRONG = Path.of("..", "tests", "i68568utf.wrong").normalize();
+    private static final Path I1706659_AFF = Path.of("..", "tests", "1706659.aff").normalize();
+    private static final Path I1706659_DIC = Path.of("..", "tests", "1706659.dic").normalize();
+    private static final Path I1706659_WRONG = Path.of("..", "tests", "1706659.wrong").normalize();
+    private static final Path I1748408_1_AFF = Path.of("..", "tests", "1748408-1.aff").normalize();
+    private static final Path I1748408_1_DIC = Path.of("..", "tests", "1748408-1.dic").normalize();
+    private static final Path I1748408_1_GOOD = Path.of("..", "tests", "1748408-1.good").normalize();
+    private static final Path I1748408_2_AFF = Path.of("..", "tests", "1748408-2.aff").normalize();
+    private static final Path I1748408_2_DIC = Path.of("..", "tests", "1748408-2.dic").normalize();
+    private static final Path I1748408_2_GOOD = Path.of("..", "tests", "1748408-2.good").normalize();
+    private static final Path I1748408_3_AFF = Path.of("..", "tests", "1748408-3.aff").normalize();
+    private static final Path I1748408_3_DIC = Path.of("..", "tests", "1748408-3.dic").normalize();
+    private static final Path I1748408_3_GOOD = Path.of("..", "tests", "1748408-3.good").normalize();
+    private static final Path I1748408_4_AFF = Path.of("..", "tests", "1748408-4.aff").normalize();
+    private static final Path I1748408_4_DIC = Path.of("..", "tests", "1748408-4.dic").normalize();
+    private static final Path I1748408_4_GOOD = Path.of("..", "tests", "1748408-4.good").normalize();
+    private static final Path DIGITS_IN_WORDS_AFF = Path.of("..", "tests", "digits_in_words.aff").normalize();
+    private static final Path DIGITS_IN_WORDS_DIC = Path.of("..", "tests", "digits_in_words.dic").normalize();
+    private static final Path DIGITS_IN_WORDS_WRONG = Path.of("..", "tests", "digits_in_words.wrong").normalize();
+    private static final Path COLONS_IN_WORDS_AFF = Path.of("..", "tests", "colons_in_words.aff").normalize();
+    private static final Path COLONS_IN_WORDS_DIC = Path.of("..", "tests", "colons_in_words.dic").normalize();
+    private static final Path NGRAM_UTF_FIX_AFF = Path.of("..", "tests", "ngram_utf_fix.aff").normalize();
+    private static final Path NGRAM_UTF_FIX_DIC = Path.of("..", "tests", "ngram_utf_fix.dic").normalize();
+    private static final Path NGRAM_UTF_FIX_GOOD = Path.of("..", "tests", "ngram_utf_fix.good").normalize();
+    private static final Path NGRAM_UTF_FIX_WRONG = Path.of("..", "tests", "ngram_utf_fix.wrong").normalize();
+    private static final Path I1975530_AFF = Path.of("..", "tests", "1975530.aff").normalize();
+    private static final Path I1975530_DIC = Path.of("..", "tests", "1975530.dic").normalize();
+    private static final Path I1975530_GOOD = Path.of("..", "tests", "1975530.good").normalize();
+    private static final Path I1975530_WRONG = Path.of("..", "tests", "1975530.wrong").normalize();
+    private static final Path ENCODING_AFF = Path.of("..", "tests", "encoding.aff").normalize();
+    private static final Path ENCODING_DIC = Path.of("..", "tests", "encoding.dic").normalize();
+    private static final Path ENCODING_GOOD = Path.of("..", "tests", "encoding.good").normalize();
+    private static final Path KOREAN_AFF = Path.of("..", "tests", "korean.aff").normalize();
+    private static final Path KOREAN_DIC = Path.of("..", "tests", "korean.dic").normalize();
+    private static final Path KOREAN_GOOD = Path.of("..", "tests", "korean.good").normalize();
+    private static final Path KOREAN_WRONG = Path.of("..", "tests", "korean.wrong").normalize();
+    private static final Path OPENTAAL_FORBIDDENWORD2_AFF = Path.of("..", "tests", "opentaal_forbiddenword2.aff").normalize();
+    private static final Path OPENTAAL_FORBIDDENWORD2_DIC = Path.of("..", "tests", "opentaal_forbiddenword2.dic").normalize();
+    private static final Path OPENTAAL_FORBIDDENWORD2_GOOD = Path.of("..", "tests", "opentaal_forbiddenword2.good").normalize();
+    private static final Path OPENTAAL_FORBIDDENWORD2_WRONG = Path.of("..", "tests", "opentaal_forbiddenword2.wrong").normalize();
+    private static final Path ARABIC_AFF = Path.of("..", "tests", "arabic.aff").normalize();
+    private static final Path ARABIC_DIC = Path.of("..", "tests", "arabic.dic").normalize();
+    private static final Path ARABIC_WRONG = Path.of("..", "tests", "arabic.wrong").normalize();
+    private static final Path WARN_AFF = Path.of("..", "tests", "warn.aff").normalize();
+    private static final Path WARN_DIC = Path.of("..", "tests", "warn.dic").normalize();
+    private static final Path WARN_GOOD = Path.of("..", "tests", "warn.good").normalize();
+    private static final Path RIGHT_TO_LEFT_MARK_AFF = Path.of("..", "tests", "right_to_left_mark.aff").normalize();
+    private static final Path RIGHT_TO_LEFT_MARK_DIC = Path.of("..", "tests", "right_to_left_mark.dic").normalize();
+    private static final Path RIGHT_TO_LEFT_MARK_GOOD = Path.of("..", "tests", "right_to_left_mark.good").normalize();
+    private static final Path I54633_AFF = Path.of("..", "tests", "i54633.aff").normalize();
+    private static final Path I54633_DIC = Path.of("..", "tests", "i54633.dic").normalize();
+    private static final Path I54633_GOOD = Path.of("..", "tests", "i54633.good").normalize();
+    private static final Path I54633_WRONG = Path.of("..", "tests", "i54633.wrong").normalize();
+    private static final Path I54980_AFF = Path.of("..", "tests", "i54980.aff").normalize();
+    private static final Path I54980_DIC = Path.of("..", "tests", "i54980.dic").normalize();
+    private static final Path I54980_GOOD = Path.of("..", "tests", "i54980.good").normalize();
+    private static final Path MAPUTF_AFF = Path.of("..", "tests", "maputf.aff").normalize();
+    private static final Path MAPUTF_DIC = Path.of("..", "tests", "maputf.dic").normalize();
+    private static final Path MAPUTF_WRONG = Path.of("..", "tests", "maputf.wrong").normalize();
+    private static final Path REPUTF_AFF = Path.of("..", "tests", "reputf.aff").normalize();
+    private static final Path REPUTF_DIC = Path.of("..", "tests", "reputf.dic").normalize();
+    private static final Path REPUTF_WRONG = Path.of("..", "tests", "reputf.wrong").normalize();
 
     @Test
     void conditionGood_ofosuf1_isAccepted() {
@@ -440,6 +563,342 @@ class HunspellPortedCorpusTest {
     @Test
     void ignoreUtfCorpusGood_allWordsAccepted() {
         assertAllAccepted(IGNOREUTF_AFF, IGNOREUTF_DIC, IGNOREUTF_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void needAffix2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(NEEDAFFIX2_AFF, NEEDAFFIX2_DIC, NEEDAFFIX2_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void needAffix4CorpusGood_allWordsAccepted() {
+        assertAllAccepted(NEEDAFFIX4_AFF, NEEDAFFIX4_DIC, NEEDAFFIX4_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void zeroAffixCorpusGood_allWordsAccepted() {
+        assertAllAccepted(ZEROAFFIX_AFF, ZEROAFFIX_DIC, ZEROAFFIX_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void fullStripCorpusGood_allWordsAccepted() {
+        assertAllAccepted(FULLSTRIP_AFF, FULLSTRIP_DIC, FULLSTRIP_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void breakOffCorpusGood_allWordsAccepted() {
+        assertAllAccepted(BREAKOFF_AFF, BREAKOFF_DIC, BREAKOFF_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void breakOffCorpusWrong_allWordsRejected() {
+        assertAllRejected(BREAKOFF_AFF, BREAKOFF_DIC, BREAKOFF_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void allCaps3CorpusGood_allWordsAccepted() {
+        assertAllAccepted(ALLCAPS3_AFF, ALLCAPS3_DIC, ALLCAPS3_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void allCaps3CorpusWrong_allWordsRejected() {
+        assertAllRejected(ALLCAPS3_AFF, ALLCAPS3_DIC, ALLCAPS3_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkCompoundRep2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(CHECKCOMPOUNDREP2_AFF, CHECKCOMPOUNDREP2_DIC, CHECKCOMPOUNDREP2_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void utfCompoundCorpusGood_allWordsAccepted() {
+        assertAllAccepted(UTFCOMPOUND_AFF, UTFCOMPOUND_DIC, UTFCOMPOUND_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i35725CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I35725_AFF, I35725_DIC, I35725_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i35725CorpusWrong_allWordsRejected() {
+        assertAllRejected(I35725_AFF, I35725_DIC, I35725_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void gh1076CorpusGood_allWordsAccepted() {
+        assertAllAccepted(GH1076_AFF, GH1076_DIC, GH1076_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void gh1076CorpusWrong_allWordsRejected() {
+        assertAllRejected(GH1076_AFF, GH1076_DIC, GH1076_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void mapCorpusWrong_allWordsRejected() {
+        assertAllRejected(MAP_AFF, MAP_DIC, MAP_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void repCorpusWrong_allWordsRejected() {
+        assertAllRejected(REP_AFF, REP_DIC, REP_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1592880CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I1592880_AFF, I1592880_DIC, I1592880_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1695964CorpusWrong_allWordsRejected() {
+        assertAllRejected(I1695964_AFF, I1695964_DIC, I1695964_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1463589CorpusWrong_allWordsRejected() {
+        assertAllRejected(I1463589_AFF, I1463589_DIC, I1463589_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1463589UtfCorpusWrong_allWordsRejected() {
+        assertAllRejected(I1463589_UTF_AFF, I1463589_UTF_DIC, I1463589_UTF_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void ijCorpusGood_allWordsAccepted() {
+        assertAllAccepted(IJ_AFF, IJ_DIC, IJ_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void ijCorpusWrong_allWordsRejected() {
+        assertAllRejected(IJ_AFF, IJ_DIC, IJ_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i68568CorpusWrong_allWordsRejected() {
+        assertAllRejected(I68568_AFF, I68568_DIC, I68568_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i68568UtfCorpusWrong_allWordsRejected() {
+        assertAllRejected(I68568UTF_AFF, I68568UTF_DIC, I68568UTF_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i1706659CorpusWrong_allWordsRejected() {
+        assertAllRejected(I1706659_AFF, I1706659_DIC, I1706659_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1748408_1CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I1748408_1_AFF, I1748408_1_DIC, I1748408_1_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1748408_2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I1748408_2_AFF, I1748408_2_DIC, I1748408_2_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1748408_3CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I1748408_3_AFF, I1748408_3_DIC, I1748408_3_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i1748408_4CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I1748408_4_AFF, I1748408_4_DIC, I1748408_4_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void digitsInWordsCorpusWrong_allWordsRejected() {
+        assertAllRejected(DIGITS_IN_WORDS_AFF, DIGITS_IN_WORDS_DIC, DIGITS_IN_WORDS_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void ngramUtfFixCorpusGood_allWordsAccepted() {
+        assertAllAccepted(NGRAM_UTF_FIX_AFF, NGRAM_UTF_FIX_DIC, NGRAM_UTF_FIX_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void ngramUtfFixCorpusWrong_allWordsRejected() {
+        assertAllRejected(NGRAM_UTF_FIX_AFF, NGRAM_UTF_FIX_DIC, NGRAM_UTF_FIX_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i1975530CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I1975530_AFF, I1975530_DIC, I1975530_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i1975530CorpusWrong_allWordsRejected() {
+        assertAllRejected(I1975530_AFF, I1975530_DIC, I1975530_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void encodingCorpusGood_allWordsAccepted() {
+        assertAllAccepted(ENCODING_AFF, ENCODING_DIC, ENCODING_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void koreanCorpusGood_allWordsAccepted() {
+        assertAllAccepted(KOREAN_AFF, KOREAN_DIC, KOREAN_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void koreanCorpusWrong_allWordsRejected() {
+        assertAllRejected(KOREAN_AFF, KOREAN_DIC, KOREAN_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void opentaalForbiddenword2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(OPENTAAL_FORBIDDENWORD2_AFF, OPENTAAL_FORBIDDENWORD2_DIC, OPENTAAL_FORBIDDENWORD2_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void opentaalForbiddenword2CorpusWrong_allWordsRejected() {
+        assertAllRejected(OPENTAAL_FORBIDDENWORD2_AFF, OPENTAAL_FORBIDDENWORD2_DIC, OPENTAAL_FORBIDDENWORD2_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void arabicCorpusWrong_allWordsRejected() {
+        assertAllRejected(ARABIC_AFF, ARABIC_DIC, ARABIC_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void warnCorpusGood_allWordsAccepted() {
+        assertAllAccepted(WARN_AFF, WARN_DIC, WARN_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void rightToLeftMarkCorpusGood_allWordsAccepted() {
+        assertAllAccepted(RIGHT_TO_LEFT_MARK_AFF, RIGHT_TO_LEFT_MARK_DIC, RIGHT_TO_LEFT_MARK_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void rightToLeftMarkGood_sampleWordAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(RIGHT_TO_LEFT_MARK_AFF).dictionary(RIGHT_TO_LEFT_MARK_DIC).build()) {
+            assertTrue(hunspell.spell("‏ط‏ي‏ر"));
+            assertTrue(hunspell.spell("‏ف‏ت‏ح‏ة"));
+            assertTrue(hunspell.spell("‏س‏ك‏و‏ن"));
+        }
+    }
+
+    @Test
+    void i54633CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I54633_AFF, I54633_DIC, I54633_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i54633CorpusWrong_allWordsRejected() {
+        assertAllRejected(I54633_AFF, I54633_DIC, I54633_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i54633Good_andWrong_sampleWordsChecked() {
+        try (Hunspell hunspell = Hunspell.builder().affix(I54633_AFF).dictionary(I54633_DIC).build()) {
+            assertTrue(hunspell.spell("éditer"));
+            assertTrue(hunspell.spell("Éditer"));
+            assertFalse(hunspell.spell("editer"));
+            assertFalse(hunspell.spell("Editer"));
+        }
+    }
+
+    @Test
+    void i54980CorpusGood_allWordsAccepted() {
+        assertAllAccepted(I54980_AFF, I54980_DIC, I54980_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void i54980Good_sampleWordsAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(I54980_AFF).dictionary(I54980_DIC).build()) {
+            assertTrue(hunspell.spell("cœur"));
+            assertTrue(hunspell.spell("œuvre"));
+            assertTrue(hunspell.spell("CŒUR"));
+            assertTrue(hunspell.spell("ŒUVRE"));
+        }
+    }
+
+    @Test
+    void mapUtfCorpusWrong_allWordsRejected() {
+        assertAllRejected(MAPUTF_AFF, MAPUTF_DIC, MAPUTF_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void mapUtfWrong_sampleWordsRejected() {
+        try (Hunspell hunspell = Hunspell.builder().affix(MAPUTF_AFF).dictionary(MAPUTF_DIC).build()) {
+            assertFalse(hunspell.spell("Fruhstuck"));
+            assertFalse(hunspell.spell("tukorfuro"));
+            assertFalse(hunspell.spell("gross"));
+        }
+    }
+
+    @Test
+    void reputfCorpusWrong_allWordsRejected() {
+        assertAllRejected(REPUTF_AFF, REPUTF_DIC, REPUTF_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void reputfWrong_sampleWordRejected() {
+        try (Hunspell hunspell = Hunspell.builder().affix(REPUTF_AFF).dictionary(REPUTF_DIC).build()) {
+            assertFalse(hunspell.spell("foo"));
+        }
+    }
+
+    @Test
+    void i54633Good_lowercaseAccentedAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(I54633_AFF).dictionary(I54633_DIC).build()) {
+            assertTrue(hunspell.spell("éditer"));
+        }
+    }
+
+    @Test
+    void i54633Good_titlecaseAccentedAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(I54633_AFF).dictionary(I54633_DIC).build()) {
+            assertTrue(hunspell.spell("Éditer"));
+        }
+    }
+
+    @Test
+    void i54980Good_lowercaseLigatureAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(I54980_AFF).dictionary(I54980_DIC).build()) {
+            assertTrue(hunspell.spell("cœur"));
+        }
+    }
+
+    @Test
+    void i54980Good_uppercaseLigatureAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(I54980_AFF).dictionary(I54980_DIC).build()) {
+            assertTrue(hunspell.spell("CŒUR"));
+        }
+    }
+
+    @Test
+    void rightToLeftMarkGood_fathaAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(RIGHT_TO_LEFT_MARK_AFF).dictionary(RIGHT_TO_LEFT_MARK_DIC).build()) {
+            assertTrue(hunspell.spell("‏ف‏ت‏ح‏ة"));
+        }
+    }
+
+    @Test
+    void rightToLeftMarkGood_sukunAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(RIGHT_TO_LEFT_MARK_AFF).dictionary(RIGHT_TO_LEFT_MARK_DIC).build()) {
+            assertTrue(hunspell.spell("‏س‏ك‏و‏ن"));
+        }
+    }
+
+    @Test
+    void mapUtfWrong_grossRejected() {
+        try (Hunspell hunspell = Hunspell.builder().affix(MAPUTF_AFF).dictionary(MAPUTF_DIC).build()) {
+            assertFalse(hunspell.spell("gross"));
+        }
+    }
+
+    @Test
+    void mapUtfWrong_fruhstuckRejected() {
+        try (Hunspell hunspell = Hunspell.builder().affix(MAPUTF_AFF).dictionary(MAPUTF_DIC).build()) {
+            assertFalse(hunspell.spell("Fruhstuck"));
+        }
     }
 
     private static void assertConditionAccepted(String word) {
