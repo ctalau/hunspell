@@ -32,7 +32,7 @@ Total tests: **140**
 - [x] `slash.dic` *(ported subset passing in Java: full `slash.good` corpus assertions plus direct checks for escaped slash tokens, including bare `/`, `1/2`, and `http://`)*
 - [x] `forbiddenword.dic` *(ported subset passing in Java: full `forbiddenword.good`/`forbiddenword.wrong` corpus assertions plus direct homonym and case-fallback short-circuit checks (`foo`/`bar`/`kg`/`cm` accepted; `bars`/`foos`/`Kg`/`KG`/`Cm` rejected))*
 - [x] `nosuggest.dic` *(ported subset passing in Java: full `nosuggest.good`/`nosuggest.wrong` corpus assertions are passing for NOSUGGEST fixture spell acceptance/rejection behavior)*
-- [ ] `alias.dic`
+- [x] `alias.dic` *(ported subset passing in Java: full `alias.good` corpus assertions are passing, including AF flag-vector alias resolution for dictionary entries and continuation classes)*
 - [ ] `alias2.dic`
 - [ ] `alias3.dic`
 - [x] `breakdefault.dic` *(ported subset passing in Java: full `breakdefault.wrong` corpus rejection assertions are passing for BREAK default negative paths)*
@@ -51,7 +51,7 @@ Total tests: **140**
 - [x] `conditionalprefix.dic` *(ported subset passing in Java: full `conditionalprefix.good`/`conditionalprefix.wrong` corpus assertions are passing for conditional prefix acceptance/rejection behavior)*
 - [x] `zeroaffix.dic` *(ported subset passing in Java: full `zeroaffix.good` corpus assertions are passing, covering zero-strip affix application acceptance)*
 - [x] `utf8.dic` *(ported subset passing in Java: full `utf8.good` corpus assertions are passing with UTF-8 corpus loading)*
-- [ ] `utf8_bom.dic`
+- [x] `utf8_bom.dic` *(ported subset passing in Java: full `utf8_bom.good` corpus assertions are passing for UTF-8 BOM-in-affix header loading behavior)*
 - [x] `utf8_bom2.dic` *(ported subset passing in Java: full `utf8_bom2.good` corpus assertions are passing for UTF-8 BOM fixture loading behavior)*
 - [x] `utf8_nonbmp.test` *(ported subset passing in Java: full `utf8_nonbmp.good` acceptance and `utf8_nonbmp.wrong` rejection corpus assertions are passing for non-BMP UTF-8 spell checks)*
 - [x] `compoundflag.dic` *(ported subset passing in Java: full `compoundflag.good`/`compoundflag.wrong` corpus assertions are passing for COMPOUNDFLAG fixture behavior)*
@@ -110,7 +110,7 @@ Total tests: **140**
 - [x] `morph.dic` *(ported subset passing in Java: morphology API checks over `tests/morph.aff` + `tests/morph.dic` validate `analyze` (`drink`/`drinks`), `stem` (`drinks -> drink`), and `generate` model-flag inflection output (`walk` -> `walks`/`walkable`))* 
 - [x] `1975530.dic` *(ported subset passing in Java: full `1975530.good`/`1975530.wrong` corpus assertions are passing with UTF-8 corpus loading for Arabic content)*
 - [x] `fullstrip.dic` *(ported subset passing in Java: full `fullstrip.good` corpus assertions are passing, covering full-strip affix behavior in this fixture)*
-- [ ] `iconv.dic`
+- [x] `iconv.dic` *(ported subset passing in Java: full `iconv.good` corpus assertions are passing for ICONV input-normalization acceptance paths (`ş/ţ/Ş/Ţ` variants mapped to dictionary forms))*
 - [ ] `iconv2.dic`
 - [x] `oconv.dic` *(ported subset passing in Java: full `oconv.good`/`oconv.wrong` corpus assertions are passing for OCONV fixture spell behavior)*
 - [ ] `oconv2.dic`

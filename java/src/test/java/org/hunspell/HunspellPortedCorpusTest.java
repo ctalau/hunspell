@@ -225,6 +225,9 @@ class HunspellPortedCorpusTest {
     private static final Path UTF8_AFF = Path.of("..", "tests", "utf8.aff").normalize();
     private static final Path UTF8_DIC = Path.of("..", "tests", "utf8.dic").normalize();
     private static final Path UTF8_GOOD = Path.of("..", "tests", "utf8.good").normalize();
+    private static final Path UTF8_BOM_AFF = Path.of("..", "tests", "utf8_bom.aff").normalize();
+    private static final Path UTF8_BOM_DIC = Path.of("..", "tests", "utf8_bom.dic").normalize();
+    private static final Path UTF8_BOM_GOOD = Path.of("..", "tests", "utf8_bom.good").normalize();
     private static final Path UTF8_BOM2_AFF = Path.of("..", "tests", "utf8_bom2.aff").normalize();
     private static final Path UTF8_BOM2_DIC = Path.of("..", "tests", "utf8_bom2.dic").normalize();
     private static final Path UTF8_BOM2_GOOD = Path.of("..", "tests", "utf8_bom2.good").normalize();
@@ -1031,6 +1034,11 @@ class HunspellPortedCorpusTest {
     }
 
     @Test
+    void utf8BomCorpusGood_allWordsAccepted() {
+        assertAllAccepted(UTF8_BOM_AFF, UTF8_BOM_DIC, UTF8_BOM_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
     void utf8Bom2CorpusGood_allWordsAccepted() {
         assertAllAccepted(UTF8_BOM2_AFF, UTF8_BOM2_DIC, UTF8_BOM2_GOOD, StandardCharsets.UTF_8);
     }
@@ -1066,6 +1074,16 @@ class HunspellPortedCorpusTest {
     @Test
     void keepcaseCorpusGood_allWordsAccepted() {
         assertAllAccepted(Path.of("..", "tests", "keepcase.aff").normalize(), Path.of("..", "tests", "keepcase.dic").normalize(), Path.of("..", "tests", "keepcase.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void aliasCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "alias.aff").normalize(), Path.of("..", "tests", "alias.dic").normalize(), Path.of("..", "tests", "alias.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void iconvCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "iconv.aff").normalize(), Path.of("..", "tests", "iconv.dic").normalize(), Path.of("..", "tests", "iconv.good").normalize(), StandardCharsets.UTF_8);
     }
 
 

@@ -44,9 +44,11 @@ final class AffixManager {
     private int compoundMin = 3;
     private final List<int[]> compoundRules = new ArrayList<>();
     private final List<String> breakTable = new ArrayList<>();
+    private final IconvTable inputConversions = new IconvTable();
     private boolean breakTableExplicit;
     private final Map<Integer, List<AffixRule>> prefixes = new HashMap<>();
     private final Map<Integer, List<AffixRule>> suffixes = new HashMap<>();
+    private final List<int[]> flagAliases = new ArrayList<>();
     private final List<AffixRule> allPrefixes = new ArrayList<>();
     private final List<AffixRule> allSuffixes = new ArrayList<>();
     private final java.util.Set<Integer> contClassFlags = new java.util.HashSet<>();
@@ -121,6 +123,21 @@ final class AffixManager {
         return sb.toString();
     }
 
+    /**
+     * Lookup-time normalization: apply ICONV table first, then IGNORE stripping.
+     * Mirrors Hunspell input conversion before spell lookup.
+     */
+    String normalizeLookupWord(String word) {
+        if (word == null || word.isEmpty()) {
+            return word;
+        }
+        String converted = inputConversions.convert(word);
+        if (converted == null) {
+            converted = word;
+        }
+        return normalizeWord(converted);
+    }
+
     void load(Path affPath) {
         try {
             byte[] bytes = Files.readAllBytes(affPath);
@@ -137,7 +154,7 @@ final class AffixManager {
 
     private void preparseHeader(String content) {
         for (String rawLine : content.lines().toList()) {
-            String line = rawLine.strip();
+            String line = stripUtf8Bom(rawLine).strip();
             if (line.isEmpty() || line.startsWith("#")) {
                 continue;
             }
@@ -169,7 +186,7 @@ final class AffixManager {
 
     private void parseBody(List<String> lines) {
         for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i).strip();
+            String line = stripUtf8Bom(lines.get(i)).strip();
             if (line.isEmpty() || line.startsWith("#")) {
                 continue;
             }
@@ -210,7 +227,7 @@ final class AffixManager {
                 int read = 0;
                 while (read < count && i + 1 < lines.size()) {
                     i++;
-                    String ruleLine = lines.get(i).strip();
+                    String ruleLine = stripUtf8Bom(lines.get(i)).strip();
                     if (ruleLine.isEmpty() || ruleLine.startsWith("#")) {
                         continue;
                     }
@@ -222,13 +239,47 @@ final class AffixManager {
                 }
                 continue;
             }
+            if ("AF".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                int count = Integer.parseInt(parts[1]);
+                int read = 0;
+                while (read < count && i + 1 < lines.size()) {
+                    i++;
+                    String aliasLine = stripUtf8Bom(lines.get(i)).strip();
+                    if (aliasLine.isEmpty() || aliasLine.startsWith("#")) {
+                        continue;
+                    }
+                    String[] aliasParts = aliasLine.split("\\s+");
+                    if (aliasParts.length >= 2 && "AF".equals(aliasParts[0])) {
+                        flagAliases.add(Flags.decode(aliasParts[1], flagMode));
+                    }
+                    read++;
+                }
+                continue;
+            }
+            if ("ICONV".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                int count = Integer.parseInt(parts[1]);
+                int read = 0;
+                while (read < count && i + 1 < lines.size()) {
+                    i++;
+                    String iconvLine = stripUtf8Bom(lines.get(i)).strip();
+                    if (iconvLine.isEmpty() || iconvLine.startsWith("#")) {
+                        continue;
+                    }
+                    String[] iconvParts = iconvLine.split("\\s+");
+                    if (iconvParts.length >= 3 && "ICONV".equals(iconvParts[0])) {
+                        inputConversions.add(iconvParts[1], iconvParts[2]);
+                    }
+                    read++;
+                }
+                continue;
+            }
             if ("BREAK".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
                 breakTableExplicit = true;
                 int count = Integer.parseInt(parts[1]);
                 int read = 0;
                 while (read < count && i + 1 < lines.size()) {
                     i++;
-                    String entry = lines.get(i).strip();
+                    String entry = stripUtf8Bom(lines.get(i)).strip();
                     if (entry.isEmpty() || entry.startsWith("#")) {
                         continue;
                     }
@@ -251,7 +302,7 @@ final class AffixManager {
                 int read = 0;
                 while (read < count && i + 1 < lines.size()) {
                     i++;
-                    String ruleLine = lines.get(i).strip();
+                    String ruleLine = stripUtf8Bom(lines.get(i)).strip();
                     if (ruleLine.isEmpty() || ruleLine.startsWith("#")) {
                         continue;
                     }
@@ -269,7 +320,7 @@ final class AffixManager {
                         String addPart = appendField.substring(0, slash);
                         String contPart = appendField.substring(slash + 1);
                         append = "0".equals(addPart) ? "" : addPart;
-                        contFlags = Flags.decode(contPart, flagMode);
+                        contFlags = decodeFlags(contPart);
                     } else {
                         append = "0".equals(appendField) ? "" : appendField;
                         contFlags = new int[0];
@@ -295,6 +346,144 @@ final class AffixManager {
         }
     }
 
+    private static String stripUtf8Bom(String line) {
+        if (line == null || line.isEmpty()) {
+            return line;
+        }
+        if (line.charAt(0) == '\uFEFF') {
+            return line.substring(1);
+        }
+        if (line.startsWith("\u00EF\u00BB\u00BF")) {
+            return line.substring(3);
+        }
+        return line;
+    }
+
+    private int[] decodeFlags(String token) {
+        if (!flagAliases.isEmpty() && token.matches("\\d+")) {
+            int index = Integer.parseInt(token);
+            if (index >= 1 && index <= flagAliases.size()) {
+                return flagAliases.get(index - 1);
+            }
+        }
+        return Flags.decode(token, flagMode);
+    }
+
+    private static final class IconvTable {
+        private final List<IconvEntry> entries = new ArrayList<>();
+
+        void add(String patternIn, String replacementIn) {
+            if (patternIn == null || patternIn.isEmpty() || replacementIn == null || replacementIn.isEmpty()) {
+                return;
+            }
+            int type = 0;
+            String pattern = patternIn;
+            if (pattern.charAt(0) == '_') {
+                pattern = pattern.substring(1);
+                type = 1;
+            }
+            if (!pattern.isEmpty() && pattern.charAt(pattern.length() - 1) == '_') {
+                pattern = pattern.substring(0, pattern.length() - 1);
+                type += 2;
+            }
+            pattern = pattern.replace("_", " ");
+            String replacement = replacementIn.replace("_", " ");
+
+            int existing = findLongestPrefixIndex(pattern, 0);
+            if (existing >= 0 && entries.get(existing).pattern.equals(pattern)) {
+                entries.get(existing).out[type] = replacement;
+                return;
+            }
+
+            IconvEntry newEntry = new IconvEntry(pattern);
+            newEntry.out[type] = replacement;
+            entries.add(newEntry);
+            entries.sort((a, b) -> a.pattern.compareTo(b.pattern));
+        }
+
+        String convert(String word) {
+            if (entries.isEmpty() || word.isEmpty()) {
+                return null;
+            }
+            StringBuilder out = new StringBuilder(word.length());
+            boolean changed = false;
+            for (int i = 0; i < word.length(); i++) {
+                int idx = findLongestPrefixIndex(word, i);
+                if (idx < 0) {
+                    out.append(word.charAt(i));
+                    continue;
+                }
+                IconvEntry entry = entries.get(idx);
+                String replacement = replacement(word.length() - i, entry, i == 0);
+                if (replacement.isEmpty()) {
+                    out.append(word.charAt(i));
+                    continue;
+                }
+                out.append(replacement);
+                if (!entry.pattern.isEmpty()) {
+                    i += entry.pattern.length() - 1;
+                }
+                changed = true;
+            }
+            return changed ? out.toString() : null;
+        }
+
+        private String replacement(int remainingLen, IconvEntry entry, boolean atStart) {
+            int type = atStart ? 1 : 0;
+            if (remainingLen == entry.pattern.length()) {
+                type = atStart ? 3 : 2;
+            }
+            while (type >= 0 && entry.out[type].isEmpty()) {
+                type = (type == 2 && !atStart) ? 0 : type - 1;
+            }
+            return type >= 0 ? entry.out[type] : "";
+        }
+
+        private int findLongestPrefixIndex(String text, int start) {
+            int p1 = 0;
+            int p2 = entries.size() - 1;
+            int ret = -1;
+            while (p1 <= p2) {
+                int m = (p1 + p2) >>> 1;
+                String pattern = entries.get(m).pattern;
+                int cmp = comparePrefix(text, start, pattern);
+                if (cmp < 0) {
+                    p2 = m - 1;
+                } else if (cmp > 0) {
+                    p1 = m + 1;
+                } else {
+                    ret = m;
+                    p1 = m + 1;
+                }
+            }
+            return ret;
+        }
+
+        private int comparePrefix(String text, int start, String pattern) {
+            int max = Math.min(pattern.length(), text.length() - start);
+            for (int i = 0; i < max; i++) {
+                char wc = text.charAt(start + i);
+                char pc = pattern.charAt(i);
+                if (wc != pc) {
+                    return wc < pc ? -1 : 1;
+                }
+            }
+            if (pattern.length() > text.length() - start) {
+                return -1;
+            }
+            return 0;
+        }
+    }
+
+    private static final class IconvEntry {
+        private final String pattern;
+        private final String[] out = {"", "", "", ""};
+
+        private IconvEntry(String pattern) {
+            this.pattern = pattern;
+        }
+    }
+
     private void addRule(AffixRule rule) {
         Map<Integer, List<AffixRule>> map = rule.prefix() ? prefixes : suffixes;
         map.computeIfAbsent(rule.flag(), ignored -> new ArrayList<>()).add(rule);
@@ -305,6 +494,10 @@ final class AffixManager {
         Map<Integer, List<AffixRule>> map = prefix ? prefixes : suffixes;
         List<AffixRule> rules = map.get(flag);
         return rules == null ? Collections.emptyList() : rules;
+    }
+
+    List<int[]> flagAliases() {
+        return Collections.unmodifiableList(flagAliases);
     }
 
     List<String> generateWords(String stem, int[] flags) {
