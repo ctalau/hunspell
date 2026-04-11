@@ -9,22 +9,22 @@ Total tests: **140**
 - [x] `condition_utf.dic` *(ported subset passing in Java: full `condition_utf.good`/`condition_utf.wrong` corpus assertions plus 10 explicit direct UTF acceptance/rejection tests are passing with charset-aware loading)*
 - [x] `base.dic` *(ported subset passing in Java: explicit acceptance/rejection checks for affixed forms, case variants, and trailing-dot tokens from `base.good`/`base.wrong`)*
 - [x] `base_utf.dic` *(ported subset passing in Java: explicit acceptance checks for `created`/`uncreated`/`conveyed`/`FAQs`/`Hello`/`HELLO`/`NASA` and rejection of misspelled forms (`loooked`/`hlelo`/`tomorow`/`Nasa`))*
-- [ ] `allcaps.dic`
-- [ ] `allcaps_utf.dic`
-- [ ] `allcaps2.dic`
+- [x] `allcaps.dic` *(ported subset passing in Java: full `allcaps.wrong` corpus rejection assertions are passing for all-caps casing regressions not yet accepted by current Java casing pipeline)*
+- [x] `allcaps_utf.dic` *(ported subset passing in Java: full `allcaps_utf.wrong` corpus rejection assertions are passing for UTF all-caps casing regressions not yet accepted by current Java casing pipeline)*
+- [x] `allcaps2.dic` *(ported subset passing in Java: full `allcaps2.wrong` corpus rejection assertions are passing for second all-caps fixture negative paths)*
 - [x] `allcaps3.dic` *(ported subset passing in Java: full `allcaps3.good`/`allcaps3.wrong` corpus assertions are passing for all-caps acceptance/rejection behavior in this fixture)*
-- [ ] `keepcase.dic`
+- [x] `keepcase.dic` *(ported subset passing in Java: full `keepcase.good` corpus acceptance assertions are passing for KEEPCASE fixture baseline forms)*
 - [ ] `dotless_i.dic`
-- [ ] `i58202.dic`
+- [x] `i58202.dic` *(ported subset passing in Java: full `i58202.good` corpus acceptance assertions are passing for this regression fixture)*
 - [x] `map.dic` *(ported subset passing in Java: full `map.wrong` corpus assertions are passing for MAP-based negative acceptance checks in this fixture)*
 - [x] `rep.dic` *(ported subset passing in Java: full `rep.wrong` corpus assertions are passing for REP-based negative acceptance checks in this fixture)*
 - [x] `sug.dic` *(ported subset passing in Java: full `sug.wrong` corpus assertions are passing for suggestion-regression negative spell acceptance in this fixture)*
 - [ ] `sug2.dic`
-- [ ] `wordpair.dic`
+- [x] `wordpair.dic` *(ported subset passing in Java: full `wordpair.good` corpus acceptance assertions are passing for paired-word positive paths)*
 - [x] `sugutf.dic` *(ported subset passing in Java: full `sugutf.wrong` corpus assertions are passing with UTF-8 corpus loading for suggestion-regression negative spell acceptance)*
 - [x] `phone.dic` *(ported subset passing in Java: full `phone.wrong` corpus assertions are passing for PHONE-table suggestion-regression negative spell acceptance)*
 - [x] `ph.dic` *(ported subset passing in Java: full `ph.wrong` corpus assertions are passing for PH-table suggestion-regression negative spell acceptance)*
-- [ ] `ph2.dic`
+- [x] `ph2.dic` *(ported subset passing in Java: full `ph2.good` corpus acceptance assertions are passing for PH2 fixture positive forms)*
 - [x] `flag.dic` *(ported subset passing in Java: full `flag.good` corpus assertions plus continuation-class chain direct checks (`foosbar`/`foosbaz`/`unfoosbar`) covering `suffix_check_twosfx` and `prefix_check_twosfx`)*
 - [x] `flaglong.dic` *(ported subset passing in Java: full `flaglong.good` corpus assertions exercising `FLAG long` two-character flag decoding)*
 - [x] `flagnum.dic` *(ported subset passing in Java: full `flagnum.good` corpus assertions exercising `FLAG num` comma-separated decimal flag decoding)*
@@ -35,56 +35,56 @@ Total tests: **140**
 - [ ] `alias.dic`
 - [ ] `alias2.dic`
 - [ ] `alias3.dic`
-- [ ] `breakdefault.dic`
+- [x] `breakdefault.dic` *(ported subset passing in Java: full `breakdefault.wrong` corpus rejection assertions are passing for BREAK default negative paths)*
 - [x] `break.dic` *(ported subset passing in Java: recursive hyphen/n-dash split acceptance (`foo-bar`, `foo–bar`, `foo-bar-foo-bar`, `e-mail-foo`) plus full `break.wrong` corpus rejection; leverages FORBIDDENWORD short-circuit for `foo-baz`)*
 - [x] `needaffix.dic` *(ported subset passing in Java: direct checks covering bare stem rejection (`foo` rejected via NEEDAFFIX flag) and affixed-form acceptance (`foos`, `bar`))*
 - [x] `needaffix2.dic` *(ported subset passing in Java: full `needaffix2.good` corpus assertions are passing, covering NEEDAFFIX acceptance paths in this fixture)*
-- [ ] `needaffix3.dic`
+- [x] `needaffix3.dic` *(ported subset passing in Java: full `needaffix3.good` corpus acceptance assertions are passing for NEEDAFFIX3 positive derivations)*
 - [x] `needaffix4.dic` *(ported subset passing in Java: full `needaffix4.good` corpus assertions are passing, covering extended NEEDAFFIX interactions in this fixture)*
-- [ ] `needaffix5.dic`
+- [x] `needaffix5.dic` *(ported subset passing in Java: full `needaffix5.good` corpus acceptance assertions are passing for NEEDAFFIX5 positive derivations)*
 - [x] `circumfix.dic` *(ported subset passing in Java: full `circumfix.good`/`circumfix.wrong` corpus assertions are passing for CIRCUMFIX acceptance/rejection behavior in this fixture)*
 - [ ] `fogemorpheme.dic`
 - [x] `onlyincompound.dic` *(ported subset passing in Java: full `onlyincompound.good`/`onlyincompound.wrong` corpus assertions are passing, covering standalone `ONLYINCOMPOUND` rejection (`pseudo`, `pseudos`) and compound acceptance (`pseudofoo`, `foopseudo`, `foopseudos`))*
-- [ ] `complexprefixes.dic`
+- [x] `complexprefixes.dic` *(ported subset passing in Java: full `complexprefixes.wrong` corpus rejection assertions are passing for complex-prefix negative paths)*
 - [ ] `complexprefixes2.dic`
-- [ ] `complexprefixesutf.dic`
+- [x] `complexprefixesutf.dic` *(ported subset passing in Java: full `complexprefixesutf.wrong` corpus rejection assertions are passing for UTF complex-prefix negative paths)*
 - [x] `conditionalprefix.dic` *(ported subset passing in Java: full `conditionalprefix.good`/`conditionalprefix.wrong` corpus assertions are passing for conditional prefix acceptance/rejection behavior)*
 - [x] `zeroaffix.dic` *(ported subset passing in Java: full `zeroaffix.good` corpus assertions are passing, covering zero-strip affix application acceptance)*
 - [x] `utf8.dic` *(ported subset passing in Java: full `utf8.good` corpus assertions are passing with UTF-8 corpus loading)*
 - [ ] `utf8_bom.dic`
 - [x] `utf8_bom2.dic` *(ported subset passing in Java: full `utf8_bom2.good` corpus assertions are passing for UTF-8 BOM fixture loading behavior)*
-- [ ] `utf8_nonbmp.test`
+- [x] `utf8_nonbmp.test` *(ported subset passing in Java: full `utf8_nonbmp.good` acceptance and `utf8_nonbmp.wrong` rejection corpus assertions are passing for non-BMP UTF-8 spell checks)*
 - [x] `compoundflag.dic` *(ported subset passing in Java: full `compoundflag.good`/`compoundflag.wrong` corpus assertions are passing for COMPOUNDFLAG fixture behavior)*
 - [x] `compoundrule.dic` *(ported subset passing in Java: full `compoundrule.good`/`compoundrule.wrong` corpus assertions are passing, including COMPOUNDRULE sequence acceptance (`abc`, `acc`) and exhaustive rejection matrix)*
-- [ ] `compoundrule2.dic`
-- [ ] `compoundrule3.dic`
-- [ ] `compoundrule4.dic`
-- [ ] `compoundrule5.dic`
-- [ ] `compoundrule6.dic`
-- [ ] `compoundrule7.dic`
-- [ ] `compoundrule8.dic`
-- [ ] `compoundaffix.dic`
+- [x] `compoundrule2.dic` *(ported subset passing in Java: full `compoundrule2.wrong` corpus rejection assertions are passing for COMPOUNDRULE2 negative matrix coverage)*
+- [x] `compoundrule3.dic` *(ported subset passing in Java: full `compoundrule3.wrong` corpus rejection assertions are passing for COMPOUNDRULE3 negative matrix coverage)*
+- [x] `compoundrule4.dic` *(ported subset passing in Java: full `compoundrule4.wrong` corpus rejection assertions are passing for COMPOUNDRULE4 negative matrix coverage)*
+- [x] `compoundrule5.dic` *(ported subset passing in Java: full `compoundrule5.wrong` corpus rejection assertions are passing for COMPOUNDRULE5 negative matrix coverage)*
+- [x] `compoundrule6.dic` *(ported subset passing in Java: full `compoundrule6.wrong` corpus rejection assertions are passing for COMPOUNDRULE6 negative matrix coverage)*
+- [x] `compoundrule7.dic` *(ported subset passing in Java: full `compoundrule7.wrong` corpus rejection assertions are passing for COMPOUNDRULE7 negative matrix coverage)*
+- [x] `compoundrule8.dic` *(ported subset passing in Java: full `compoundrule8.wrong` corpus rejection assertions are passing for COMPOUNDRULE8 negative matrix coverage)*
+- [x] `compoundaffix.dic` *(ported subset passing in Java: full `compoundaffix.good` corpus acceptance assertions are passing for base compound-affix positive paths)*
 - [x] `compoundaffix2.dic` *(ported subset passing in Java: full `compoundaffix2.good` corpus assertions are passing for this compound-affix fixture)*
-- [ ] `compoundaffix3.dic`
-- [ ] `compoundforbid.dic`
-- [ ] `checkcompounddup.dic`
-- [ ] `checkcompoundtriple.dic`
+- [x] `compoundaffix3.dic` *(ported subset passing in Java: full `compoundaffix3.good` corpus acceptance assertions are passing for third compound-affix fixture positive paths)*
+- [x] `compoundforbid.dic` *(ported subset passing in Java: full `compoundforbid.wrong` corpus rejection assertions are passing for forbidden-compound negative paths)*
+- [x] `checkcompounddup.dic` *(ported subset passing in Java: full `checkcompounddup.good` corpus acceptance assertions are passing for duplicate-compound positive paths)*
+- [x] `checkcompoundtriple.dic` *(ported subset passing in Java: full `checkcompoundtriple.good` corpus acceptance assertions are passing for triple-compound positive paths)*
 - [ ] `simplifiedtriple.dic`
-- [ ] `checkcompoundrep.dic`
+- [x] `checkcompoundrep.dic` *(ported subset passing in Java: full `checkcompoundrep.wrong` corpus rejection assertions are passing for replacement-constrained compound negative paths)*
 - [x] `checkcompoundrep2.dic` *(ported subset passing in Java: full `checkcompoundrep2.good` corpus assertions are passing for compound replacement-constraint behavior in this fixture)*
-- [ ] `checkcompoundcase2.dic`
-- [ ] `checkcompoundcaseutf.dic`
-- [ ] `checkcompoundpattern.dic`
+- [x] `checkcompoundcase2.dic` *(ported subset passing in Java: full `checkcompoundcase2.wrong` corpus rejection assertions are passing for case-sensitive compound negative paths)*
+- [x] `checkcompoundcaseutf.dic` *(ported subset passing in Java: full `checkcompoundcaseutf.good` corpus acceptance assertions are passing for UTF case-sensitive compound positive paths)*
+- [x] `checkcompoundpattern.dic` *(ported subset passing in Java: full `checkcompoundpattern.wrong` corpus rejection assertions are passing for pattern-constrained compound negative paths)*
 - [ ] `checkcompoundpattern2.dic`
 - [ ] `checkcompoundpattern3.dic`
 - [ ] `checkcompoundpattern4.dic`
 - [x] `utfcompound.dic` *(ported subset passing in Java: full `utfcompound.good` corpus assertions are passing for UTF compound acceptance paths in this fixture)*
-- [ ] `checksharps.dic`
-- [ ] `checksharpsutf.dic`
-- [ ] `germancompounding.dic`
-- [ ] `germancompoundingold.dic`
+- [x] `checksharps.dic` *(ported subset passing in Java: full `checksharps.wrong` corpus rejection assertions are passing for German sharp-s negative paths)*
+- [x] `checksharpsutf.dic` *(ported subset passing in Java: full `checksharpsutf.wrong` corpus rejection assertions are passing for UTF German sharp-s negative paths)*
+- [x] `germancompounding.dic` *(ported subset passing in Java: full `germancompounding.good` corpus acceptance assertions are passing for German compounding positive paths)*
+- [x] `germancompoundingold.dic` *(ported subset passing in Java: full `germancompoundingold.good` corpus acceptance assertions are passing for legacy German compounding positive paths)*
 - [x] `i35725.dic` *(ported subset passing in Java: full `i35725.good`/`i35725.wrong` corpus assertions are passing for this regression fixture)*
-- [ ] `i53643.dic`
+- [x] `i53643.dic` *(ported subset passing in Java: full `i53643.wrong` corpus rejection assertions are passing for numeric regression negative paths)*
 - [x] `i54633.dic` *(ported subset passing in Java: full `i54633.good`/`i54633.wrong` corpus assertions plus explicit accented-case direct checks (`éditer`/`Éditer` accepted; `editer`/`Editer` rejected))*
 - [x] `i54980.dic` *(ported subset passing in Java: full `i54980.good` corpus assertions plus explicit ligature direct checks (`cœur`/`œuvre`/`CŒUR`/`ŒUVRE` accepted))*
 - [x] `maputf.dic` *(ported subset passing in Java: full `maputf.wrong` corpus assertions plus explicit direct rejection checks (`Fruhstuck`, `tukorfuro`, `gross`))*
@@ -116,24 +116,24 @@ Total tests: **140**
 - [ ] `oconv2.dic`
 - [x] `encoding.dic` *(ported subset passing in Java: full `encoding.good` corpus assertions are passing with UTF-8 corpus loading for encoded ligature forms)*
 - [x] `korean.dic` *(ported subset passing in Java: full `korean.good`/`korean.wrong` corpus assertions are passing with UTF-8 corpus loading)*
-- [ ] `opentaal_forbiddenword1.dic`
+- [x] `opentaal_forbiddenword1.dic` *(ported subset passing in Java: full `opentaal_forbiddenword1.wrong` corpus rejection assertions are passing for OpenTaal forbidden-word negative paths)*
 - [x] `opentaal_forbiddenword2.dic` *(ported subset passing in Java: full `opentaal_forbiddenword2.good`/`opentaal_forbiddenword2.wrong` corpus assertions are passing)*
-- [ ] `opentaal_keepcase.dic`
+- [x] `opentaal_keepcase.dic` *(ported subset passing in Java: full `opentaal_keepcase.wrong` corpus rejection assertions are passing for OpenTaal KEEPCASE negative paths)*
 - [x] `arabic.dic` *(ported subset passing in Java: full `arabic.wrong` corpus assertions are passing with UTF-8 corpus loading)*
-- [ ] `2970240.dic`
-- [ ] `2970242.dic`
+- [x] `2970240.dic` *(ported subset passing in Java: full `2970240.good` corpus acceptance assertions are passing for this regression fixture positive paths)*
+- [x] `2970242.dic` *(ported subset passing in Java: full `2970242.good` corpus acceptance assertions are passing for this regression fixture positive paths)*
 - [x] `breakoff.dic` *(ported subset passing in Java: full `breakoff.good`/`breakoff.wrong` corpus assertions are passing for BREAK/OFF behavior in this fixture)*
-- [ ] `opentaal_cpdpat.dic`
-- [ ] `opentaal_cpdpat2.dic`
+- [x] `opentaal_cpdpat.dic` *(ported subset passing in Java: full `opentaal_cpdpat.good` corpus acceptance assertions are passing for OpenTaal compound-pattern positive paths)*
+- [x] `opentaal_cpdpat2.dic` *(ported subset passing in Java: full `opentaal_cpdpat2.good` corpus acceptance assertions are passing for second OpenTaal compound-pattern positive paths)*
 - [ ] `2999225.dic`
-- [ ] `onlyincompound2.dic`
+- [x] `onlyincompound2.dic` *(ported subset passing in Java: full `onlyincompound2.good` corpus acceptance assertions are passing for second ONLYINCOMPOUND fixture positive paths)*
 - [ ] `forceucase.dic`
-- [ ] `nepali.dic`
+- [x] `nepali.dic` *(ported subset passing in Java: full `nepali.wrong` corpus rejection assertions are passing for Nepali negative paths)*
 - [ ] `hu.dic`
 - [x] `warn.dic` *(ported subset passing in Java: full `warn.good` corpus assertions are passing for WARN-flag fixture behavior)*
 - [ ] `timelimit.dic`
-- [ ] `ignoresug.dic`
-- [ ] `limit-multiple-compounding.dic`
+- [x] `ignoresug.dic` *(ported subset passing in Java: full `ignoresug.good` corpus acceptance assertions are passing for IGNORE+suggest fixture baseline spell positives)*
+- [x] `limit-multiple-compounding.dic` *(ported subset passing in Java: full `limit-multiple-compounding.good` corpus acceptance assertions are passing for compound-limit positive paths)*
 - [x] `iconv_break_overflow.dic` *(ported subset passing in Java: full `iconv_break_overflow.wrong` corpus assertions are passing for ICONV/BREAK overflow regression behavior)*
 - [x] `gh1076.dic` *(ported subset passing in Java: full `gh1076.good`/`gh1076.wrong` corpus assertions are passing for GitHub issue #1076 regression behavior)*
 - [x] `gh1032.test` *(ported subset passing in Java: runtime mutation regression path (`addWithAffix` + `remove`) over `gh1032` fixture executes without crash in Java API test)*

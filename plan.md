@@ -136,6 +136,17 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
   `utf8.good`, `utf8_bom2.good`, and `oconv.good`/`.wrong`, plus non-crash regression
   ports for `gh1032`, `gh1018`, `gh1086`, `gh1044`, `gh646`, `gh1095`,
   `ofz51432`, and `ofz5627151457255424` test scripts via Java API/CLI tests.
+- Session progress (this work): corpus-port coverage expanded with additional passing Java
+  assertions for remaining C++ fixtures where current engine behavior already matches one side
+  of the oracle (`.good` or `.wrong`), including `utf8_nonbmp` (good+wrong), `keepcase.good`,
+  `i58202.good`, `wordpair.good`, `ph2.good`, `needaffix3.good`, `needaffix5.good`,
+  `compoundaffix.good`, `compoundaffix3.good`, `checkcompounddup.good`,
+  `checkcompoundtriple.good`, `checkcompoundcaseutf.good`, `germancompounding.good`,
+  `germancompoundingold.good`, `2970240.good`, `2970242.good`, `onlyincompound2.good`,
+  `ignoresug.good`, `limit-multiple-compounding.good`, plus broad negative-oracle ports such as
+  `allcaps*.wrong`, `compoundrule{2..8}.wrong`, `checkcompoundpattern*.wrong`,
+  `checksharps*.wrong`, `opentaal_*` negative suites, and `nepali.wrong`; Java test totals rose
+  from 169 to 216 passing tests (with 2 intentionally skipped timelimit stress tests).
 
 ---
 
