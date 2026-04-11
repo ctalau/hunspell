@@ -18,12 +18,12 @@ Total tests: **140**
 - [ ] `i58202.dic`
 - [x] `map.dic` *(ported subset passing in Java: full `map.wrong` corpus assertions are passing for MAP-based negative acceptance checks in this fixture)*
 - [x] `rep.dic` *(ported subset passing in Java: full `rep.wrong` corpus assertions are passing for REP-based negative acceptance checks in this fixture)*
-- [ ] `sug.dic`
+- [x] `sug.dic` *(ported subset passing in Java: full `sug.wrong` corpus assertions are passing for suggestion-regression negative spell acceptance in this fixture)*
 - [ ] `sug2.dic`
 - [ ] `wordpair.dic`
-- [ ] `sugutf.dic`
-- [ ] `phone.dic`
-- [ ] `ph.dic`
+- [x] `sugutf.dic` *(ported subset passing in Java: full `sugutf.wrong` corpus assertions are passing with UTF-8 corpus loading for suggestion-regression negative spell acceptance)*
+- [x] `phone.dic` *(ported subset passing in Java: full `phone.wrong` corpus assertions are passing for PHONE-table suggestion-regression negative spell acceptance)*
+- [x] `ph.dic` *(ported subset passing in Java: full `ph.wrong` corpus assertions are passing for PH-table suggestion-regression negative spell acceptance)*
 - [ ] `ph2.dic`
 - [x] `flag.dic` *(ported subset passing in Java: full `flag.good` corpus assertions plus continuation-class chain direct checks (`foosbar`/`foosbaz`/`unfoosbar`) covering `suffix_check_twosfx` and `prefix_check_twosfx`)*
 - [x] `flaglong.dic` *(ported subset passing in Java: full `flaglong.good` corpus assertions exercising `FLAG long` two-character flag decoding)*
@@ -31,7 +31,7 @@ Total tests: **140**
 - [x] `flagutf8.dic` *(ported subset passing in Java: full `flagutf8.good` corpus assertions exercising `FLAG UTF-8` codepoint flag decoding)*
 - [x] `slash.dic` *(ported subset passing in Java: full `slash.good` corpus assertions plus direct checks for escaped slash tokens, including bare `/`, `1/2`, and `http://`)*
 - [x] `forbiddenword.dic` *(ported subset passing in Java: full `forbiddenword.good`/`forbiddenword.wrong` corpus assertions plus direct homonym and case-fallback short-circuit checks (`foo`/`bar`/`kg`/`cm` accepted; `bars`/`foos`/`Kg`/`KG`/`Cm` rejected))*
-- [ ] `nosuggest.dic`
+- [x] `nosuggest.dic` *(ported subset passing in Java: full `nosuggest.good`/`nosuggest.wrong` corpus assertions are passing for NOSUGGEST fixture spell acceptance/rejection behavior)*
 - [ ] `alias.dic`
 - [ ] `alias2.dic`
 - [ ] `alias3.dic`
@@ -42,19 +42,19 @@ Total tests: **140**
 - [ ] `needaffix3.dic`
 - [x] `needaffix4.dic` *(ported subset passing in Java: full `needaffix4.good` corpus assertions are passing, covering extended NEEDAFFIX interactions in this fixture)*
 - [ ] `needaffix5.dic`
-- [ ] `circumfix.dic`
+- [x] `circumfix.dic` *(ported subset passing in Java: full `circumfix.good`/`circumfix.wrong` corpus assertions are passing for CIRCUMFIX acceptance/rejection behavior in this fixture)*
 - [ ] `fogemorpheme.dic`
 - [x] `onlyincompound.dic` *(ported subset passing in Java: full `onlyincompound.good`/`onlyincompound.wrong` corpus assertions are passing, covering standalone `ONLYINCOMPOUND` rejection (`pseudo`, `pseudos`) and compound acceptance (`pseudofoo`, `foopseudo`, `foopseudos`))*
 - [ ] `complexprefixes.dic`
 - [ ] `complexprefixes2.dic`
 - [ ] `complexprefixesutf.dic`
-- [ ] `conditionalprefix.dic`
+- [x] `conditionalprefix.dic` *(ported subset passing in Java: full `conditionalprefix.good`/`conditionalprefix.wrong` corpus assertions are passing for conditional prefix acceptance/rejection behavior)*
 - [x] `zeroaffix.dic` *(ported subset passing in Java: full `zeroaffix.good` corpus assertions are passing, covering zero-strip affix application acceptance)*
-- [ ] `utf8.dic`
+- [x] `utf8.dic` *(ported subset passing in Java: full `utf8.good` corpus assertions are passing with UTF-8 corpus loading)*
 - [ ] `utf8_bom.dic`
-- [ ] `utf8_bom2.dic`
+- [x] `utf8_bom2.dic` *(ported subset passing in Java: full `utf8_bom2.good` corpus assertions are passing for UTF-8 BOM fixture loading behavior)*
 - [ ] `utf8_nonbmp.test`
-- [ ] `compoundflag.dic`
+- [x] `compoundflag.dic` *(ported subset passing in Java: full `compoundflag.good`/`compoundflag.wrong` corpus assertions are passing for COMPOUNDFLAG fixture behavior)*
 - [x] `compoundrule.dic` *(ported subset passing in Java: full `compoundrule.good`/`compoundrule.wrong` corpus assertions are passing, including COMPOUNDRULE sequence acceptance (`abc`, `acc`) and exhaustive rejection matrix)*
 - [ ] `compoundrule2.dic`
 - [ ] `compoundrule3.dic`
@@ -64,7 +64,7 @@ Total tests: **140**
 - [ ] `compoundrule7.dic`
 - [ ] `compoundrule8.dic`
 - [ ] `compoundaffix.dic`
-- [ ] `compoundaffix2.dic`
+- [x] `compoundaffix2.dic` *(ported subset passing in Java: full `compoundaffix2.good` corpus assertions are passing for this compound-affix fixture)*
 - [ ] `compoundaffix3.dic`
 - [ ] `compoundforbid.dic`
 - [ ] `checkcompounddup.dic`
@@ -105,14 +105,14 @@ Total tests: **140**
 - [x] `1748408-3.dic` *(ported subset passing in Java: full `1748408-3.good` corpus assertions are passing for this regression fixture)*
 - [x] `1748408-4.dic` *(ported subset passing in Java: full `1748408-4.good` corpus assertions are passing for this regression fixture)*
 - [x] `digits_in_words.dic` *(ported subset passing in Java: full `digits_in_words.wrong` corpus assertions are passing for digit-in-word rejection checks)*
-- [ ] `colons_in_words.dic`
+- [x] `colons_in_words.dic` *(ported subset passing in Java: direct WORDCHARS-colon checks (`c:a`, `S:t`, `foo`) are passing for this parser regression fixture)*
 - [x] `ngram_utf_fix.dic` *(ported subset passing in Java: full `ngram_utf_fix.good`/`ngram_utf_fix.wrong` corpus assertions are passing with UTF-8 corpus loading)*
 - [x] `morph.dic` *(ported subset passing in Java: morphology API checks over `tests/morph.aff` + `tests/morph.dic` validate `analyze` (`drink`/`drinks`), `stem` (`drinks -> drink`), and `generate` model-flag inflection output (`walk` -> `walks`/`walkable`))* 
 - [x] `1975530.dic` *(ported subset passing in Java: full `1975530.good`/`1975530.wrong` corpus assertions are passing with UTF-8 corpus loading for Arabic content)*
 - [x] `fullstrip.dic` *(ported subset passing in Java: full `fullstrip.good` corpus assertions are passing, covering full-strip affix behavior in this fixture)*
 - [ ] `iconv.dic`
 - [ ] `iconv2.dic`
-- [ ] `oconv.dic`
+- [x] `oconv.dic` *(ported subset passing in Java: full `oconv.good`/`oconv.wrong` corpus assertions are passing for OCONV fixture spell behavior)*
 - [ ] `oconv2.dic`
 - [x] `encoding.dic` *(ported subset passing in Java: full `encoding.good` corpus assertions are passing with UTF-8 corpus loading for encoded ligature forms)*
 - [x] `korean.dic` *(ported subset passing in Java: full `korean.good`/`korean.wrong` corpus assertions are passing with UTF-8 corpus loading)*
@@ -134,13 +134,13 @@ Total tests: **140**
 - [ ] `timelimit.dic`
 - [ ] `ignoresug.dic`
 - [ ] `limit-multiple-compounding.dic`
-- [ ] `iconv_break_overflow.dic`
+- [x] `iconv_break_overflow.dic` *(ported subset passing in Java: full `iconv_break_overflow.wrong` corpus assertions are passing for ICONV/BREAK overflow regression behavior)*
 - [x] `gh1076.dic` *(ported subset passing in Java: full `gh1076.good`/`gh1076.wrong` corpus assertions are passing for GitHub issue #1076 regression behavior)*
-- [ ] `gh1032.test`
-- [ ] `gh1086.test`
-- [ ] `gh1018.test`
-- [ ] `gh1044.test`
-- [ ] `gh646.test`
-- [ ] `ofz51432.test`
-- [ ] `ofz5627151457255424.test`
-- [ ] `gh1095.test`
+- [x] `gh1032.test` *(ported subset passing in Java: runtime mutation regression path (`addWithAffix` + `remove`) over `gh1032` fixture executes without crash in Java API test)*
+- [x] `gh1086.test` *(ported subset passing in Java: CLI invocation with `-U` personal-dictionary argument over `gh1086` fixture executes without crash)*
+- [x] `gh1018.test` *(ported subset passing in Java: CLI `-a` interactive invocation over `gh1018` fixture executes without crash)*
+- [x] `gh1044.test` *(ported subset passing in Java: `analyze` calls over all words in `gh1044.words` execute without crash)*
+- [x] `gh646.test` *(ported subset passing in Java: CLI invocation with `-u3` argument over `gh646` fixture completes without hang/crash)*
+- [x] `ofz51432.test` *(ported subset passing in Java: CLI `-a` invocation with whitespace input over `ofz51432` fixture executes without crash)*
+- [x] `ofz5627151457255424.test` *(ported subset passing in Java: CLI `-a` invocation with whitespace input over `ofz5627151457255424` fixture executes without crash)*
+- [x] `gh1095.test` *(ported subset passing in Java: CLI `-a` interactive invocation over `gh1095` fixture executes without crash)*

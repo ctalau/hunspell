@@ -199,6 +199,34 @@ class HunspellBootstrapTest {
         }
     }
 
+    @Test
+    void gh1032_addWithAffixAndRemoveDoNotBreakAliasedFlags() {
+        Path affix = Path.of("..", "tests", "gh1032.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "gh1032.dic").normalize();
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            hunspell.addWithAffix("x", "test");
+            hunspell.remove("test");
+            hunspell.remove("x");
+        }
+    }
+
+    @Test
+    void gh1044AnalyzeCorpusDoesNotCrash() throws IOException {
+        Path affix = Path.of("..", "tests", "gh1044.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "gh1044.dic").normalize();
+        List<String> words = Files.readAllLines(Path.of("..", "tests", "gh1044.words").normalize());
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            for (String word : words) {
+                String trimmed = word.strip();
+                if (!trimmed.isEmpty()) {
+                    hunspell.analyze(trimmed);
+                }
+            }
+        }
+    }
+
     private static Path writeDictionary(String... lines) throws IOException {
         Path file = Files.createTempFile("hunspell-java", ".dic");
         Files.write(file, String.join(System.lineSeparator(), lines).concat(System.lineSeparator()).getBytes());
