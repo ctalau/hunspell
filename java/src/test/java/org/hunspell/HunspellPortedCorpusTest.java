@@ -187,6 +187,50 @@ class HunspellPortedCorpusTest {
     private static final Path REPUTF_AFF = Path.of("..", "tests", "reputf.aff").normalize();
     private static final Path REPUTF_DIC = Path.of("..", "tests", "reputf.dic").normalize();
     private static final Path REPUTF_WRONG = Path.of("..", "tests", "reputf.wrong").normalize();
+    private static final Path CIRCUMFIX_AFF = Path.of("..", "tests", "circumfix.aff").normalize();
+    private static final Path CIRCUMFIX_DIC = Path.of("..", "tests", "circumfix.dic").normalize();
+    private static final Path CIRCUMFIX_GOOD = Path.of("..", "tests", "circumfix.good").normalize();
+    private static final Path CIRCUMFIX_WRONG = Path.of("..", "tests", "circumfix.wrong").normalize();
+    private static final Path COMPOUNDAFFIX2_AFF = Path.of("..", "tests", "compoundaffix2.aff").normalize();
+    private static final Path COMPOUNDAFFIX2_DIC = Path.of("..", "tests", "compoundaffix2.dic").normalize();
+    private static final Path COMPOUNDAFFIX2_GOOD = Path.of("..", "tests", "compoundaffix2.good").normalize();
+    private static final Path COMPOUNDFLAG_AFF = Path.of("..", "tests", "compoundflag.aff").normalize();
+    private static final Path COMPOUNDFLAG_DIC = Path.of("..", "tests", "compoundflag.dic").normalize();
+    private static final Path COMPOUNDFLAG_GOOD = Path.of("..", "tests", "compoundflag.good").normalize();
+    private static final Path COMPOUNDFLAG_WRONG = Path.of("..", "tests", "compoundflag.wrong").normalize();
+    private static final Path CONDITIONALPREFIX_AFF = Path.of("..", "tests", "conditionalprefix.aff").normalize();
+    private static final Path CONDITIONALPREFIX_DIC = Path.of("..", "tests", "conditionalprefix.dic").normalize();
+    private static final Path CONDITIONALPREFIX_GOOD = Path.of("..", "tests", "conditionalprefix.good").normalize();
+    private static final Path CONDITIONALPREFIX_WRONG = Path.of("..", "tests", "conditionalprefix.wrong").normalize();
+    private static final Path ICONV_BREAK_OVERFLOW_AFF = Path.of("..", "tests", "iconv_break_overflow.aff").normalize();
+    private static final Path ICONV_BREAK_OVERFLOW_DIC = Path.of("..", "tests", "iconv_break_overflow.dic").normalize();
+    private static final Path ICONV_BREAK_OVERFLOW_WRONG = Path.of("..", "tests", "iconv_break_overflow.wrong").normalize();
+    private static final Path NOSUGGEST_AFF = Path.of("..", "tests", "nosuggest.aff").normalize();
+    private static final Path NOSUGGEST_DIC = Path.of("..", "tests", "nosuggest.dic").normalize();
+    private static final Path NOSUGGEST_GOOD = Path.of("..", "tests", "nosuggest.good").normalize();
+    private static final Path NOSUGGEST_WRONG = Path.of("..", "tests", "nosuggest.wrong").normalize();
+    private static final Path PH_AFF = Path.of("..", "tests", "ph.aff").normalize();
+    private static final Path PH_DIC = Path.of("..", "tests", "ph.dic").normalize();
+    private static final Path PH_WRONG = Path.of("..", "tests", "ph.wrong").normalize();
+    private static final Path PHONE_AFF = Path.of("..", "tests", "phone.aff").normalize();
+    private static final Path PHONE_DIC = Path.of("..", "tests", "phone.dic").normalize();
+    private static final Path PHONE_WRONG = Path.of("..", "tests", "phone.wrong").normalize();
+    private static final Path SUG_AFF = Path.of("..", "tests", "sug.aff").normalize();
+    private static final Path SUG_DIC = Path.of("..", "tests", "sug.dic").normalize();
+    private static final Path SUG_WRONG = Path.of("..", "tests", "sug.wrong").normalize();
+    private static final Path SUGUTF_AFF = Path.of("..", "tests", "sugutf.aff").normalize();
+    private static final Path SUGUTF_DIC = Path.of("..", "tests", "sugutf.dic").normalize();
+    private static final Path SUGUTF_WRONG = Path.of("..", "tests", "sugutf.wrong").normalize();
+    private static final Path UTF8_AFF = Path.of("..", "tests", "utf8.aff").normalize();
+    private static final Path UTF8_DIC = Path.of("..", "tests", "utf8.dic").normalize();
+    private static final Path UTF8_GOOD = Path.of("..", "tests", "utf8.good").normalize();
+    private static final Path UTF8_BOM2_AFF = Path.of("..", "tests", "utf8_bom2.aff").normalize();
+    private static final Path UTF8_BOM2_DIC = Path.of("..", "tests", "utf8_bom2.dic").normalize();
+    private static final Path UTF8_BOM2_GOOD = Path.of("..", "tests", "utf8_bom2.good").normalize();
+    private static final Path OCONV_AFF = Path.of("..", "tests", "oconv.aff").normalize();
+    private static final Path OCONV_DIC = Path.of("..", "tests", "oconv.dic").normalize();
+    private static final Path OCONV_GOOD = Path.of("..", "tests", "oconv.good").normalize();
+    private static final Path OCONV_WRONG = Path.of("..", "tests", "oconv.wrong").normalize();
 
     @Test
     void conditionGood_ofosuf1_isAccepted() {
@@ -716,6 +760,15 @@ class HunspellPortedCorpusTest {
     }
 
     @Test
+    void colonsInWords_wordcharsIncludeColonEntriesAccepted() {
+        try (Hunspell hunspell = Hunspell.builder().affix(COLONS_IN_WORDS_AFF).dictionary(COLONS_IN_WORDS_DIC).build()) {
+            assertTrue(hunspell.spell("c:a"));
+            assertTrue(hunspell.spell("S:t"));
+            assertTrue(hunspell.spell("foo"));
+        }
+    }
+
+    @Test
     void ngramUtfFixCorpusGood_allWordsAccepted() {
         assertAllAccepted(NGRAM_UTF_FIX_AFF, NGRAM_UTF_FIX_DIC, NGRAM_UTF_FIX_GOOD, StandardCharsets.UTF_8);
     }
@@ -899,6 +952,96 @@ class HunspellPortedCorpusTest {
         try (Hunspell hunspell = Hunspell.builder().affix(MAPUTF_AFF).dictionary(MAPUTF_DIC).build()) {
             assertFalse(hunspell.spell("Fruhstuck"));
         }
+    }
+
+    @Test
+    void circumfixCorpusGood_allWordsAccepted() {
+        assertAllAccepted(CIRCUMFIX_AFF, CIRCUMFIX_DIC, CIRCUMFIX_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void circumfixCorpusWrong_allWordsRejected() {
+        assertAllRejected(CIRCUMFIX_AFF, CIRCUMFIX_DIC, CIRCUMFIX_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void compoundAffix2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(COMPOUNDAFFIX2_AFF, COMPOUNDAFFIX2_DIC, COMPOUNDAFFIX2_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void compoundFlagCorpusGood_allWordsAccepted() {
+        assertAllAccepted(COMPOUNDFLAG_AFF, COMPOUNDFLAG_DIC, COMPOUNDFLAG_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void compoundFlagCorpusWrong_allWordsRejected() {
+        assertAllRejected(COMPOUNDFLAG_AFF, COMPOUNDFLAG_DIC, COMPOUNDFLAG_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void conditionalPrefixCorpusGood_allWordsAccepted() {
+        assertAllAccepted(CONDITIONALPREFIX_AFF, CONDITIONALPREFIX_DIC, CONDITIONALPREFIX_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void conditionalPrefixCorpusWrong_allWordsRejected() {
+        assertAllRejected(CONDITIONALPREFIX_AFF, CONDITIONALPREFIX_DIC, CONDITIONALPREFIX_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void iconvBreakOverflowCorpusWrong_allWordsRejected() {
+        assertAllRejected(ICONV_BREAK_OVERFLOW_AFF, ICONV_BREAK_OVERFLOW_DIC, ICONV_BREAK_OVERFLOW_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void noSuggestCorpusGood_allWordsAccepted() {
+        assertAllAccepted(NOSUGGEST_AFF, NOSUGGEST_DIC, NOSUGGEST_GOOD, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void noSuggestCorpusWrong_allWordsRejected() {
+        assertAllRejected(NOSUGGEST_AFF, NOSUGGEST_DIC, NOSUGGEST_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void phCorpusWrong_allWordsRejected() {
+        assertAllRejected(PH_AFF, PH_DIC, PH_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void phoneCorpusWrong_allWordsRejected() {
+        assertAllRejected(PHONE_AFF, PHONE_DIC, PHONE_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void sugCorpusWrong_allWordsRejected() {
+        assertAllRejected(SUG_AFF, SUG_DIC, SUG_WRONG, StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void sugUtfCorpusWrong_allWordsRejected() {
+        assertAllRejected(SUGUTF_AFF, SUGUTF_DIC, SUGUTF_WRONG, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void utf8CorpusGood_allWordsAccepted() {
+        assertAllAccepted(UTF8_AFF, UTF8_DIC, UTF8_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void utf8Bom2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(UTF8_BOM2_AFF, UTF8_BOM2_DIC, UTF8_BOM2_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void oconvCorpusGood_allWordsAccepted() {
+        assertAllAccepted(OCONV_AFF, OCONV_DIC, OCONV_GOOD, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void oconvCorpusWrong_allWordsRejected() {
+        assertAllRejected(OCONV_AFF, OCONV_DIC, OCONV_WRONG, StandardCharsets.UTF_8);
     }
 
     private static void assertConditionAccepted(String word) {

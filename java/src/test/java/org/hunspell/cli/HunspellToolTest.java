@@ -1,6 +1,7 @@
 package org.hunspell.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.Test;
 
 class HunspellToolTest {
@@ -51,6 +53,43 @@ class HunspellToolTest {
         String output = runTool(new String[] {"-d", dictionaryBase.toString(), "-G"}, "cat\ncats\ndog\n");
 
         assertEquals("cat\ncats\n", output);
+    }
+
+    @Test
+    void gh1018InteractiveModeDoesNotCrash() throws IOException {
+        String output = runTool(new String[] {"-d", Path.of("..", "tests", "gh1018").toString(), "-a"}, "zuri\n");
+        assertEquals("*\n", output);
+    }
+
+    @Test
+    void gh1086UpdatePersonalDictionaryFlagDoesNotCrash() throws IOException {
+        String output = runTool(new String[] {"-d", Path.of("..", "tests", "gh1086").toString(), "-U", Path.of("..", "tests", "gh1086.txt").toString()}, "");
+        assertEquals("", output);
+    }
+
+    @Test
+    @Timeout(10)
+    void gh646SuggestionModeFlagDoesNotHangOrCrash() throws IOException {
+        String output = runTool(new String[] {"-d", Path.of("..", "tests", "gh646").toString(), "-u3", Path.of("..", "tests", "gh646.txt").toString()}, "");
+        assertEquals("", output);
+    }
+
+    @Test
+    void ofz51432WhitespaceInputDoesNotCrash() throws IOException {
+        String output = runTool(new String[] {"-d", Path.of("..", "tests", "ofz51432").toString(), "-a"}, "  \n");
+        assertFalse(output.isEmpty());
+    }
+
+    @Test
+    void ofz5627151457255424WhitespaceInputDoesNotCrash() throws IOException {
+        String output = runTool(new String[] {"-d", Path.of("..", "tests", "ofz5627151457255424").toString(), "-a"}, "  \n");
+        assertFalse(output.isEmpty());
+    }
+
+    @Test
+    void gh1095InteractiveModeDoesNotCrash() throws IOException {
+        String output = runTool(new String[] {"-d", Path.of("..", "tests", "gh1095").toString(), "-a"}, "lag\n");
+        assertEquals("*\n", output);
     }
 
     private static String runTool(String[] args, String input) throws IOException {

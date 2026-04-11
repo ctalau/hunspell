@@ -128,6 +128,14 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
   `right_to_left_mark.good`, `i54633.good`/`.wrong`, `i54980.good`, `maputf.wrong`,
   and `reputf.wrong`, with added direct word-level assertions for accented and
   ligature cases plus right-to-left-mark tokens.
+- Additional corpus-port parity now includes passing Java ports for `circumfix.good`/`.wrong`,
+  `conditionalprefix.good`/`.wrong`, `compoundflag.good`/`.wrong`, `compoundaffix2.good`,
+  `nosuggest.good`/`.wrong`, `sug.wrong`, `sugutf.wrong`, `ph.wrong`, `phone.wrong`,
+  and `iconv_break_overflow.wrong`, plus direct `colons_in_words` WORDCHARS checks.
+- Additional encoding/CLI-regression coverage now includes passing Java ports for
+  `utf8.good`, `utf8_bom2.good`, and `oconv.good`/`.wrong`, plus non-crash regression
+  ports for `gh1032`, `gh1018`, `gh1086`, `gh1044`, `gh646`, `gh1095`,
+  `ofz51432`, and `ofz5627151457255424` test scripts via Java API/CLI tests.
 
 ---
 
