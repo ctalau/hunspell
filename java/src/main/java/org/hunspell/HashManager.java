@@ -55,10 +55,16 @@ final class HashManager {
     }
 
     private final FlagMode flagMode;
+    private final List<int[]> flagAliases;
     private final Map<String, List<Entry>> entries = new HashMap<>();
 
     HashManager(FlagMode flagMode) {
+        this(flagMode, List.of());
+    }
+
+    HashManager(FlagMode flagMode, List<int[]> flagAliases) {
         this.flagMode = flagMode;
+        this.flagAliases = new ArrayList<>(flagAliases);
     }
 
     int load(Path dicPath, Charset charset) {
@@ -89,7 +95,7 @@ final class HashManager {
                 }
                 String flagToken = parseFlagToken(line);
                 List<String> morphFields = parseMorphFields(line);
-                int[] flags = Flags.decode(flagToken, flagMode);
+                int[] flags = decodeFlags(flagToken);
                 String normalized = normalizer.apply(stem);
                 addEntry(normalized, flags, morphFields);
                 loaded++;
@@ -223,5 +229,15 @@ final class HashManager {
             }
         }
         return -1;
+    }
+
+    private int[] decodeFlags(String token) {
+        if (!flagAliases.isEmpty() && token.matches("\\d+")) {
+            int index = Integer.parseInt(token);
+            if (index >= 1 && index <= flagAliases.size()) {
+                return flagAliases.get(index - 1);
+            }
+        }
+        return Flags.decode(token, flagMode);
     }
 }

@@ -147,6 +147,24 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
   `allcaps*.wrong`, `compoundrule{2..8}.wrong`, `checkcompoundpattern*.wrong`,
   `checksharps*.wrong`, `opentaal_*` negative suites, and `nepali.wrong`; Java test totals rose
   from 169 to 216 passing tests (with 2 intentionally skipped timelimit stress tests).
+- Session progress (this work): added and fixed parity for `utf8_bom.good` by aligning UTF-8
+  BOM handling in affix-header parsing with C++ behavior (`SET` is now recognized when an
+  affix file starts with BOM bytes). Java suite totals increased from 216 to 217 passing tests
+  (still 2 intentionally skipped timelimit stress tests).
+- Session progress (this work): ported `alias.good` and fixed AF alias parity by implementing
+  flag-vector alias resolution in both `.dic` entry flag parsing and affix continuation-class
+  decoding (`SFX ... append/aliasIndex`). This matches C++ alias behavior for fixture paths such
+  as `foo/1 -> AB` and continuation `y/2 -> A`; Java suite totals increased from 217 to
+  218 passing tests (still 2 intentionally skipped timelimit stress tests).
+- Session progress (this work): ported `iconv.good` and implemented lookup-time ICONV parity for
+  simple substitution pairs, enabling canonical Romanian cedilla/comma variants (`Chişinău`,
+  `Ţepes`, `Ş`, `ţ`) while preserving prior Nepali behavior by skipping underscore-anchored or
+  IGNORE-only ICONV replacements in spell normalization. Java suite totals increased from 218 to
+  219 passing tests (still 2 intentionally skipped timelimit stress tests).
+- Session progress (this work): replaced the simplified ICONV handling with a direct Java port of
+  Hunspell `RepList` conversion semantics (context-aware `_` anchors, longest-prefix match, and
+  replacement fallback order) to improve C++ algorithm fidelity and remove test-specific behavior;
+  Java suite remains 219 passing tests (2 intentionally skipped timelimit stress tests).
 
 ---
 

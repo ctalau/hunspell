@@ -2,6 +2,12 @@
 
 The goal of this repository work is to implement `spec.md`.
 
+## 🚨 Fidelity-first implementation rule (highest priority for code changes)
+- **Always copy the C++ Hunspell algorithm with high fidelity.**
+- **Do not special-case behavior just to make a Java test pass.**
+- If a parity test fails, fix the Java implementation by matching the corresponding C++ control flow/data handling.
+- Prefer porting C++ structures/steps directly (including ordering, fallback behavior, and edge-case handling) over ad-hoc shortcuts.
+
 For every work session:
 - End with **more tests passing than the previous session**.
 - Clearly report **test parity versus the original implementation**.

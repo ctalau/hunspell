@@ -123,7 +123,7 @@ final class SimpleHunspell implements Hunspell {
         }
         Set<String> generated = new LinkedHashSet<>();
         for (HashManager.Entry model : models) {
-            generated.addAll(affixManager.generateWords(affixManager.normalizeWord(word), model.flags()));
+            generated.addAll(affixManager.generateWords(affixManager.normalizeLookupWord(word), model.flags()));
         }
         return Collections.unmodifiableList(new ArrayList<>(generated));
     }
@@ -141,7 +141,7 @@ final class SimpleHunspell implements Hunspell {
         for (String desc : morphDescriptions) {
             for (HashManager.Entry candidate : candidates) {
                 if (candidate.morphology().contains(desc)) {
-                    generated.addAll(affixManager.generateWords(affixManager.normalizeWord(word), candidate.flags()));
+                    generated.addAll(affixManager.generateWords(affixManager.normalizeLookupWord(word), candidate.flags()));
                 }
             }
         }
@@ -153,14 +153,14 @@ final class SimpleHunspell implements Hunspell {
 
     @Override
     public void add(String word) {
-        String normalized = affixManager.normalizeWord(word);
+        String normalized = affixManager.normalizeLookupWord(word);
         hashManager.addEntry(normalized, new int[0], List.of("st:" + normalized));
     }
 
     @Override
     public void addWithAffix(String word, String modelWord) {
         List<HashManager.Entry> models = lookupEntries(modelWord);
-        String normalized = affixManager.normalizeWord(word);
+        String normalized = affixManager.normalizeLookupWord(word);
         if (models.isEmpty()) {
             hashManager.addEntry(normalized, new int[0], List.of("st:" + normalized));
             return;
@@ -171,7 +171,7 @@ final class SimpleHunspell implements Hunspell {
 
     @Override
     public void remove(String word) {
-        hashManager.removeEntry(affixManager.normalizeWord(word));
+        hashManager.removeEntry(affixManager.normalizeLookupWord(word));
     }
 
     @Override
@@ -251,7 +251,7 @@ final class SimpleHunspell implements Hunspell {
     }
 
     private LookupResult lookupVariant(String word, boolean inCompound) {
-        String normalized = affixManager.normalizeWord(word);
+        String normalized = affixManager.normalizeLookupWord(word);
         int forbiddenFlag = affixManager.forbiddenWordFlag();
         int needAffixFlag = affixManager.needAffixFlag();
         int onlyInCompoundFlag = affixManager.onlyInCompoundFlag();
@@ -299,7 +299,7 @@ final class SimpleHunspell implements Hunspell {
         if (word == null || word.isEmpty()) {
             return List.of();
         }
-        String normalized = affixManager.normalizeWord(word);
+        String normalized = affixManager.normalizeLookupWord(word);
         List<HashManager.Entry> direct = hashManager.lookup(normalized);
         if (!direct.isEmpty()) {
             return direct;
@@ -349,7 +349,7 @@ final class SimpleHunspell implements Hunspell {
     }
 
     private List<int[]> compoundFlagsForSegment(String segment) {
-        String normalized = affixManager.normalizeWord(segment);
+        String normalized = affixManager.normalizeLookupWord(segment);
         int forbiddenFlag = affixManager.forbiddenWordFlag();
         int needAffixFlag = affixManager.needAffixFlag();
         int compoundFlag = affixManager.compoundFlag();
@@ -610,7 +610,7 @@ final class SimpleHunspell implements Hunspell {
                 }
                 affixManager.load(affPath);
             }
-            HashManager hashManager = new HashManager(affixManager.flagMode());
+            HashManager hashManager = new HashManager(affixManager.flagMode(), affixManager.flagAliases());
             java.util.function.UnaryOperator<String> normalizer = affixManager::normalizeWord;
             hashManager.load(primaryDictionary, affixManager.charset(), normalizer);
             for (Path extraDictionary : extraDictionaries) {
