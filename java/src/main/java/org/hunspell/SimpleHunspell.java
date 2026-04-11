@@ -397,7 +397,20 @@ final class SimpleHunspell implements Hunspell {
                 return true;
             }
         }
-        return false;
+        return sequenceMatchesBeginEnd(sequence);
+    }
+
+    private boolean sequenceMatchesBeginEnd(List<int[]> sequence) {
+        if (sequence.size() < 2) {
+            return false;
+        }
+        int beginFlag = affixManager.compoundBeginFlag();
+        int endFlag = affixManager.compoundEndFlag();
+        if (beginFlag < 0 || endFlag < 0) {
+            return false;
+        }
+        return Flags.contains(sequence.get(0), beginFlag)
+            && Flags.contains(sequence.get(sequence.size() - 1), endFlag);
     }
 
     /**
