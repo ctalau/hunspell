@@ -1053,6 +1053,11 @@ class HunspellPortedCorpusTest {
         assertAllRejected(OCONV_AFF, OCONV_DIC, OCONV_WRONG, StandardCharsets.UTF_8);
     }
 
+    @Test
+    void oconv2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "oconv2.aff").normalize(), Path.of("..", "tests", "oconv2.dic").normalize(), Path.of("..", "tests", "oconv2.good").normalize(), StandardCharsets.UTF_8);
+    }
+
 
     @Test
     void allcapsCorpusWrong_allWordsRejected() {
@@ -1082,8 +1087,172 @@ class HunspellPortedCorpusTest {
     }
 
     @Test
+    void alias2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "alias2.aff").normalize(), Path.of("..", "tests", "alias2.dic").normalize(), Path.of("..", "tests", "alias2.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void alias3CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "alias3.aff").normalize(), Path.of("..", "tests", "alias3.dic").normalize(), Path.of("..", "tests", "alias3.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
     void iconvCorpusGood_allWordsAccepted() {
         assertAllAccepted(Path.of("..", "tests", "iconv.aff").normalize(), Path.of("..", "tests", "iconv.dic").normalize(), Path.of("..", "tests", "iconv.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void iconv2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "iconv2.aff").normalize(), Path.of("..", "tests", "iconv2.dic").normalize(), Path.of("..", "tests", "iconv2.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void complexprefixes2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "complexprefixes2.aff").normalize(), Path.of("..", "tests", "complexprefixes2.dic").normalize(), Path.of("..", "tests", "complexprefixes2.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void i2999225CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "2999225.aff").normalize(), Path.of("..", "tests", "2999225.dic").normalize(), Path.of("..", "tests", "2999225.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void forceucaseSubset_directAcceptanceAndRejection() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "forceucase.aff").normalize())
+            .dictionary(Path.of("..", "tests", "forceucase.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("foo"));
+            assertTrue(hunspell.spell("bar"));
+            assertTrue(hunspell.spell("baz"));
+            assertTrue(hunspell.spell("foobar"));
+            assertTrue(hunspell.spell("foobazbar"));
+        }
+    }
+
+    @Test
+    void dotlessISubset_directAcceptanceAndRejection() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "dotless_i.aff").normalize())
+            .dictionary(Path.of("..", "tests", "dotless_i.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("Diyarbakır"));
+            assertTrue(hunspell.spell("iç"));
+            assertTrue(hunspell.spell("ışık"));
+
+            assertFalse(hunspell.spell("Diyarbakir"));
+            assertFalse(hunspell.spell("DIYARBAKIR"));
+            assertFalse(hunspell.spell("İşık"));
+            assertFalse(hunspell.spell("İŞIK"));
+        }
+    }
+
+    @Test
+    void fogemorphemeSubset_directAcceptanceAndRejection() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "fogemorpheme.aff").normalize())
+            .dictionary(Path.of("..", "tests", "fogemorpheme.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("gata"));
+            assertTrue(hunspell.spell("kontoret"));
+
+            assertFalse(hunspell.spell("gatakontoret"));
+            assertFalse(hunspell.spell("kontoretgatu"));
+        }
+    }
+
+    @Test
+    void simplifiedtripleSubset_directAcceptance() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "simplifiedtriple.aff").normalize())
+            .dictionary(Path.of("..", "tests", "simplifiedtriple.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("glass"));
+            assertTrue(hunspell.spell("sko"));
+        }
+    }
+
+    @Test
+    void checkcompoundpattern2Subset_directAcceptance() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "checkcompoundpattern2.aff").normalize())
+            .dictionary(Path.of("..", "tests", "checkcompoundpattern2.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("barfoo"));
+        }
+    }
+
+    @Test
+    void huSubset_directAcceptanceAndRejection() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "hu.aff").normalize())
+            .dictionary(Path.of("..", "tests", "hu.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("majomkenyér"));
+            assertTrue(hunspell.spell("majomkenyérfaág"));
+            assertTrue(hunspell.spell("Batthyány-Strattmann-nal"));
+            assertTrue(hunspell.spell("forró"));
+
+            assertFalse(hunspell.spell("forróvíz"));
+        }
+    }
+
+    @Test
+    void sug2Subset_directRejection() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "sug2.aff").normalize())
+            .dictionary(Path.of("..", "tests", "sug2.dic").normalize())
+            .build()) {
+            assertFalse(hunspell.spell("alot"));
+            assertFalse(hunspell.spell("inspite"));
+        }
+    }
+
+    @Test
+    void checkcompoundpattern3Subset_directAcceptanceAndRejection() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "checkcompoundpattern3.aff").normalize())
+            .dictionary(Path.of("..", "tests", "checkcompoundpattern3.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("barfoo"));
+            assertTrue(hunspell.spell("banfoo"));
+            assertTrue(hunspell.spell("banbar"));
+            assertTrue(hunspell.spell("foobar"));
+            assertTrue(hunspell.spell("fooban"));
+            assertTrue(hunspell.spell("foobanbar"));
+            assertTrue(hunspell.spell("boobar"));
+            assertTrue(hunspell.spell("boobarfoo"));
+
+            assertFalse(hunspell.spell("fozar"));
+            assertFalse(hunspell.spell("fozarfoo"));
+            assertFalse(hunspell.spell("fozan"));
+            assertFalse(hunspell.spell("fozanfoo"));
+            assertFalse(hunspell.spell("bozar"));
+            assertFalse(hunspell.spell("bozarfoo"));
+        }
+    }
+
+    @Test
+    void checkcompoundpattern4Subset_directStemAcceptance() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "checkcompoundpattern4.aff").normalize())
+            .dictionary(Path.of("..", "tests", "checkcompoundpattern4.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("sUrya"));
+            assertTrue(hunspell.spell("udayaM"));
+            assertTrue(hunspell.spell("pEru"));
+            assertTrue(hunspell.spell("unna"));
+        }
+    }
+
+    @Test
+    void timelimitSubset_directLongNumericAcceptance() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "timelimit.aff").normalize())
+            .dictionary(Path.of("..", "tests", "timelimit.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.spell("1000000000000000000000"));
+        }
     }
 
 

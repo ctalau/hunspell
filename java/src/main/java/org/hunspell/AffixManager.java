@@ -41,6 +41,8 @@ final class AffixManager {
     private int needAffixFlag = -1;
     private int onlyInCompoundFlag = -1;
     private int compoundFlag = -1;
+    private int compoundBeginFlag = -1;
+    private int compoundEndFlag = -1;
     private int compoundMin = 3;
     private final List<int[]> compoundRules = new ArrayList<>();
     private final List<String> breakTable = new ArrayList<>();
@@ -53,6 +55,7 @@ final class AffixManager {
     private final List<AffixRule> allSuffixes = new ArrayList<>();
     private final java.util.Set<Integer> contClassFlags = new java.util.HashSet<>();
     private boolean haveContClass;
+    private boolean complexPrefixes;
 
     FlagMode flagMode() {
         return flagMode;
@@ -88,6 +91,14 @@ final class AffixManager {
 
     int compoundFlag() {
         return compoundFlag;
+    }
+
+    int compoundBeginFlag() {
+        return compoundBeginFlag;
+    }
+
+    int compoundEndFlag() {
+        return compoundEndFlag;
     }
 
     int compoundMin() {
@@ -198,6 +209,10 @@ final class AffixManager {
                 wordChars = line.substring("WORDCHARS".length()).strip();
                 continue;
             }
+            if ("COMPLEXPREFIXES".equals(parts[0])) {
+                complexPrefixes = true;
+                continue;
+            }
             if ("IGNORE".equals(parts[0]) && parts.length >= 2) {
                 ignoreChars = line.substring("IGNORE".length()).strip();
                 continue;
@@ -216,6 +231,14 @@ final class AffixManager {
             }
             if ("COMPOUNDFLAG".equals(parts[0]) && parts.length >= 2) {
                 compoundFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("COMPOUNDBEGIN".equals(parts[0]) && parts.length >= 2) {
+                compoundBeginFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("COMPOUNDEND".equals(parts[0]) && parts.length >= 2) {
+                compoundEndFlag = Flags.decodeSingle(parts[1], flagMode);
                 continue;
             }
             if ("COMPOUNDMIN".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
@@ -552,6 +575,12 @@ final class AffixManager {
         if (rv != null) {
             return rv;
         }
+        if (complexPrefixes && haveContClass) {
+            rv = prefixCheckTwoPfx(word, hashManager);
+            if (rv != null) {
+                return rv;
+            }
+        }
         rv = suffixCheck(word, /*prefixRule=*/ null, /*requiredCont=*/ -1, hashManager);
         if (rv != null) {
             return rv;
@@ -571,8 +600,12 @@ final class AffixManager {
 
     /** Mirrors {@code AffixMgr::prefix_check}. */
     HashManager.Entry prefixCheck(String word, HashManager hashManager) {
+        return prefixCheck(word, /*requiredCont=*/ -1, hashManager);
+    }
+
+    private HashManager.Entry prefixCheck(String word, int requiredCont, HashManager hashManager) {
         for (AffixRule rule : allPrefixes) {
-            HashManager.Entry hit = checkPrefixRule(rule, word, hashManager);
+            HashManager.Entry hit = checkPrefixRule(rule, word, requiredCont, hashManager);
             if (hit != null) {
                 return hit;
             }
@@ -580,9 +613,13 @@ final class AffixManager {
         return null;
     }
 
-    private HashManager.Entry checkPrefixRule(AffixRule rule, String word, HashManager hashManager) {
+    private HashManager.Entry checkPrefixRule(AffixRule rule, String word, int requiredCont,
+                                              HashManager hashManager) {
         String candidate = rule.stripFrom(word);
         if (candidate == null) {
+            return null;
+        }
+        if (requiredCont >= 0 && !Flags.contains(rule.contFlags(), requiredCont)) {
             return null;
         }
         for (HashManager.Entry entry : hashManager.lookup(candidate)) {
@@ -592,6 +629,28 @@ final class AffixManager {
         }
         if (rule.crossProduct()) {
             HashManager.Entry hit = suffixCheck(candidate, rule, /*requiredCont=*/ -1, hashManager);
+            if (hit != null) {
+                return hit;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Mirrors the complex-prefix continuation walk by stripping an outer prefix and
+     * requiring the inner prefix rule to expose the outer flag in its continuation
+     * class set.
+     */
+    private HashManager.Entry prefixCheckTwoPfx(String word, HashManager hashManager) {
+        for (AffixRule outer : allPrefixes) {
+            if (!contClassFlags.contains(outer.flag())) {
+                continue;
+            }
+            String candidate = outer.stripFrom(word);
+            if (candidate == null) {
+                continue;
+            }
+            HashManager.Entry hit = prefixCheck(candidate, outer.flag(), hashManager);
             if (hit != null) {
                 return hit;
             }
