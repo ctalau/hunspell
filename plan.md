@@ -71,7 +71,7 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 ---
 
 ## Phase 2: suggestion engine parity (`.sug`)
-**Status: ⬜ Not started (parity-grade implementation)**
+**Status: 🟡 In progress (TDD rollout plan added; parity-grade implementation not yet landed)**
 
 ### Workstreams
 1. Replace current Levenshtein-only ranking with Hunspell-like staged suggestion pipeline:
@@ -83,11 +83,22 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 2. Implement suggestion filtering flags (`NOSUGGEST`, forbidden interactions, casing normalization).
 3. Preserve deterministic order compatible with `.sug` golden expectations.
 
+### TDD implementation sequence (for identified gaps)
+1. **Red:** add failing parity tests that assert C++-compatible ranked outputs for fixture groups
+   (`sug`, `sug2`, `map`, `rep`, `phone`, `ph`), including capitalization-sensitive variants.
+2. **Green:** port `HunspellImpl::suggest`/`SuggestMgr` stages in the same order as C++ control flow,
+   enabling one stage at a time behind deterministic tests (edit suggestions -> REP/MAP -> PHONE -> ngram fallback).
+3. **Refactor:** extract a Java `SuggestManager` class mirroring C++ responsibilities and preserve stable order.
+4. **Red:** add tests for `NOSUGGEST`/`NONGRAMSUGGEST` filtering and forbidden-word interactions.
+5. **Green:** parse and wire missing affix directives affecting suggestions, then re-run full Java corpus tests.
+
 ### Exit criteria
 - Port first suggestion suites (`sug`, `sug2`, `map`, `rep`) into Java tests and achieve passing parity for ranked outputs.
+- Replace simplified `suggest()` implementation with staged parity logic and keep all existing spell/corpus suites green.
 
 ### Gap note
 - Current `suggest()` is intentionally simplified and does not mirror `suggestmgr` algorithmic stages.
+- This phase now tracks the concrete closure plan for gaps identified in `gap_analysis.md`.
 
 ---
 
@@ -191,6 +202,32 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
   direct subset checks for `checkcompoundpattern3`, `checkcompoundpattern4`, and `timelimit`
   (including long numeric acceptance). Java suite totals increased from 232 to 235 passing tests
   (still 2 intentionally skipped timelimit stress tests).
+
+---
+
+## Cross-phase gap-closure backlog (spec alignment + TDD)
+**Status: 🟡 In progress (planning complete, implementation pending)**
+
+### Spec alignment check
+- `spec.md` already requires rich `SpellResult` (`compound`, `forbidden`, `root`) and ranked suggestion compatibility,
+  so the main issue is implementation lag rather than missing requirements.
+- Additional C++ API parity items absent from the current Java interface (`add_with_flags`, `stem(vector<morph>)`)
+  are treated as post-Phase-5 backlog and must be introduced only with C++-matching behavior.
+
+### TDD backlog by gap
+1. **Spell info-bit parity (`check()`):**
+   - Red: add failing tests asserting `compound=true` for accepted compounds and `forbidden=true` for explicit forbidden matches.
+   - Green: propagate internal spell-info states through lookup/compound paths into `SpellResult`.
+2. **Affix directive coverage parity:**
+   - Red: fixture-backed failing tests for directives currently unimplemented in Java parser/runtime path
+     (`CHECKCOMPOUNDDUP`, `CHECKCOMPOUNDREP`, `CHECKCOMPOUNDTRIPLE`, `CHECKCOMPOUNDCASE`, `NOSUGGEST`, `NONGRAMSUGGEST`).
+   - Green: port C++ parsing and runtime checks in directive order from `affixmgr.cxx`.
+3. **API parity extensions (post-core parity):**
+   - Red: add compatibility tests for `add_with_flags`-style behavior and morphology-list stemming semantics.
+   - Green: extend Java API with C++-equivalent semantics after suggestion + directive parity is stable.
+4. **Parity test-depth hardening:**
+   - Red: replace subset-only fixture checks with fuller oracle comparisons where deterministic.
+   - Green: enable previously disabled deterministic portions (including timelimit-safe subsets) without regressions.
 
 ---
 

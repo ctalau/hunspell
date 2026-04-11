@@ -36,6 +36,14 @@ This document summarizes the highest-impact parity gaps between the C++ Hunspell
 
 **Impact:** Checklist completion does not yet imply full oracle-equivalent line-by-line parity for every fixture path.
 
+## Spec coverage check: are these gaps also present in `spec.md`?
+
+Short answer: **mostly no** for requirements, **yes** for some API-surface parity details.
+
+- Suggestion parity and ranked ordering are already required by the spec (see suggestion order compatibility goals), so this is an implementation gap rather than a spec gap.
+- `SpellResult.compound()` / `SpellResult.forbidden()` are already specified, so this is an implementation gap rather than a spec gap.
+- Broad C++ API parity items like `add_with_flags` and `stem(vector<morph>)` are not explicitly included in the minimal v1 API section; these are spec-scope gaps that should be tracked as post-v1 or explicit extensions.
+
 ## Recommended implementation order
 
 1. **Phase 2 suggestion parity port** (highest product impact): port C++ `HunspellImpl::suggest` + `SuggestMgr` control flow and ranking.
