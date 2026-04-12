@@ -99,6 +99,16 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 ### Gap note
 - Current `suggest()` is intentionally simplified and does not mirror `suggestmgr` algorithmic stages.
 - This phase now tracks the concrete closure plan for gaps identified in `gap_analysis.md`.
+- Session progress (this work): added parser/runtime support for `NOSUGGEST` filtering in
+  `suggest()` candidate collection (using affix `NOSUGGEST` flag metadata from `.aff`) and
+  replaced whole-dictionary candidate scanning with one-edit candidate generation
+  (delete/transpose/replace/insert) before flag filtering so NOSUGGEST behavior follows
+  C++-like edit-stage flow without distance-clamp special casing, and added fixture-backed
+  assertions (`nosuggest.aff`/`.dic`) verifying NOSUGGEST-flagged entries are excluded and
+  typo inputs (`foox`, `foobarx`, `barfoox`) produce empty suggestion lists, plus
+  homonym-parity and insertion-edit regressions in bootstrap tests.
+  Java suite totals increased from 242 to 243 passing tests (still 2 intentionally
+  skipped timelimit stress tests).
 
 ---
 
