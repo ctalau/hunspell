@@ -38,6 +38,7 @@ final class AffixManager {
     private String wordChars = "";
     private String ignoreChars = "";
     private int forbiddenWordFlag = -1;
+    private int noSuggestFlag = -1;
     private int needAffixFlag = -1;
     private int onlyInCompoundFlag = -1;
     private int compoundFlag = -1;
@@ -83,6 +84,10 @@ final class AffixManager {
 
     int needAffixFlag() {
         return needAffixFlag;
+    }
+
+    int noSuggestFlag() {
+        return noSuggestFlag;
     }
 
     int onlyInCompoundFlag() {
@@ -223,6 +228,10 @@ final class AffixManager {
             }
             if ("NEEDAFFIX".equals(parts[0]) && parts.length >= 2) {
                 needAffixFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("NOSUGGEST".equals(parts[0]) && parts.length >= 2) {
+                noSuggestFlag = Flags.decodeSingle(parts[1], flagMode);
                 continue;
             }
             if ("ONLYINCOMPOUND".equals(parts[0]) && parts.length >= 2) {

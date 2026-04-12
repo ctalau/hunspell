@@ -1209,6 +1209,56 @@ class HunspellPortedCorpusTest {
     }
 
     @Test
+    void nosuggestSubset_suggestionsFilteredByNosuggestFlag() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "nosuggest.aff").normalize())
+            .dictionary(Path.of("..", "tests", "nosuggest.dic").normalize())
+            .build()) {
+            assertFalse(hunspell.suggest("foox").contains("foo"));
+        }
+    }
+
+    @Test
+    void nosuggestSubset_fixtureTypoProducesNoSuggestions() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "nosuggest.aff").normalize())
+            .dictionary(Path.of("..", "tests", "nosuggest.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.suggest("foox").isEmpty());
+        }
+    }
+
+    @Test
+    void nosuggestSubset_secondFixtureTypoProducesNoSuggestions() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "nosuggest.aff").normalize())
+            .dictionary(Path.of("..", "tests", "nosuggest.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.suggest("foobarx").isEmpty());
+        }
+    }
+
+    @Test
+    void nosuggestSubset_thirdFixtureTypoStillExcludesNosuggestFlaggedEntry() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "nosuggest.aff").normalize())
+            .dictionary(Path.of("..", "tests", "nosuggest.dic").normalize())
+            .build()) {
+            assertFalse(hunspell.suggest("barfoox").contains("foo"));
+        }
+    }
+
+    @Test
+    void nosuggestSubset_thirdFixtureTypoProducesNoSuggestions() {
+        try (Hunspell hunspell = Hunspell.builder()
+            .affix(Path.of("..", "tests", "nosuggest.aff").normalize())
+            .dictionary(Path.of("..", "tests", "nosuggest.dic").normalize())
+            .build()) {
+            assertTrue(hunspell.suggest("barfoox").isEmpty());
+        }
+    }
+
+    @Test
     void checkcompoundpattern3Subset_directAcceptanceAndRejection() {
         try (Hunspell hunspell = Hunspell.builder()
             .affix(Path.of("..", "tests", "checkcompoundpattern3.aff").normalize())

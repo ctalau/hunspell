@@ -48,12 +48,24 @@ final class SimpleHunspell implements Hunspell {
 
     @Override
     public List<String> suggest(String word) {
-        // The current suggestion ranking is intentionally simple (Levenshtein over
-        // the loaded stems plus their visible derived forms) until the parity-grade
-        // SuggestManager port lands. This still preserves API contract.
+        // Edit-stage candidate generation (delete/transpose/replace/insert),
+        // then C++-style flag filtering for forbidden suggestion classes.
+        String normalized = affixManager.normalizeLookupWord(word);
         Set<String> candidates = new LinkedHashSet<>();
-        for (var bucket : hashManager.all()) {
-            candidates.add(bucket.getKey());
+        int noSuggestFlag = affixManager.noSuggestFlag();
+        int forbiddenWordFlag = affixManager.forbiddenWordFlag();
+        int onlyInCompoundFlag = affixManager.onlyInCompoundFlag();
+        Set<Integer> alphabet = suggestionAlphabet();
+        for (String candidate : edits(normalized, alphabet)) {
+            List<HashManager.Entry> entries = hashManager.lookup(candidate);
+            for (HashManager.Entry entry : entries) {
+                if (!hasFlag(entry.flags(), noSuggestFlag)
+                    && !hasFlag(entry.flags(), forbiddenWordFlag)
+                    && !hasFlag(entry.flags(), onlyInCompoundFlag)) {
+                    candidates.add(candidate);
+                    break;
+                }
+            }
         }
         List<String> ranked = new ArrayList<>(candidates);
         ranked.sort(Comparator
@@ -63,6 +75,115 @@ final class SimpleHunspell implements Hunspell {
             ranked = ranked.subList(0, maxSuggestions);
         }
         return Collections.unmodifiableList(ranked);
+    }
+
+    private Set<Integer> suggestionAlphabet() {
+        Set<Integer> alphabet = new LinkedHashSet<>();
+        for (var bucket : hashManager.all()) {
+            String stem = bucket.getKey();
+            for (int i = 0; i < stem.length(); ) {
+                int cp = stem.codePointAt(i);
+                alphabet.add(cp);
+                i += Character.charCount(cp);
+            }
+        }
+        return alphabet;
+    }
+
+    private static Set<String> edits(String word, Set<Integer> alphabet) {
+        Set<String> out = new LinkedHashSet<>();
+        if (word == null) {
+            return out;
+        }
+        List<Integer> cps = new ArrayList<>();
+        for (int i = 0; i < word.length(); ) {
+            int cp = word.codePointAt(i);
+            cps.add(cp);
+            i += Character.charCount(cp);
+        }
+        int n = cps.size();
+        for (int i = 0; i <= n; i++) {
+            // deletion
+            if (i < n) {
+                out.add(joinWithoutIndex(cps, i));
+            }
+            // transposition
+            if (i + 1 < n) {
+                out.add(joinWithSwap(cps, i, i + 1));
+            }
+            // replacement
+            if (i < n) {
+                for (int repl : alphabet) {
+                    if (repl != cps.get(i)) {
+                        out.add(joinWithReplace(cps, i, repl));
+                    }
+                }
+            }
+            // insertion
+            for (int ins : alphabet) {
+                out.add(joinWithInsert(cps, i, ins));
+            }
+        }
+        out.remove(word);
+        return out;
+    }
+
+    private static String joinWithoutIndex(List<Integer> cps, int skip) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cps.size(); i++) {
+            if (i != skip) {
+                sb.appendCodePoint(cps.get(i));
+            }
+        }
+        return sb.toString();
+    }
+
+    private static String joinWithSwap(List<Integer> cps, int left, int right) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cps.size(); i++) {
+            if (i == left) {
+                sb.appendCodePoint(cps.get(right));
+            } else if (i == right) {
+                sb.appendCodePoint(cps.get(left));
+            } else {
+                sb.appendCodePoint(cps.get(i));
+            }
+        }
+        return sb.toString();
+    }
+
+    private static String joinWithReplace(List<Integer> cps, int index, int replacement) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cps.size(); i++) {
+            sb.appendCodePoint(i == index ? replacement : cps.get(i));
+        }
+        return sb.toString();
+    }
+
+    private static String joinWithInsert(List<Integer> cps, int index, int inserted) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cps.size(); i++) {
+            if (i == index) {
+                sb.appendCodePoint(inserted);
+            }
+            sb.appendCodePoint(cps.get(i));
+        }
+        if (index == cps.size()) {
+            sb.appendCodePoint(inserted);
+        }
+        return sb.toString();
+    }
+
+    private static boolean hasFlag(int[] flags, int flag) {
+        if (flag < 0) {
+            return false;
+        }
+        for (int candidateFlag : flags) {
+            if (candidateFlag == flag) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

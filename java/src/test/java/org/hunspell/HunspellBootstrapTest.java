@@ -55,6 +55,34 @@ class HunspellBootstrapTest {
     }
 
     @Test
+    void suggestKeepsDistanceSortedOrderAcrossAllCandidates() throws IOException {
+        Path dictionary = writeDictionary("2", "cat", "dog");
+
+        try (Hunspell hunspell = Hunspell.builder().dictionary(dictionary).build()) {
+            assertIterableEquals(List.of("cat"), hunspell.suggest("caat"));
+        }
+    }
+
+    @Test
+    void suggestKeepsHomonymWhenOnlyOneVariantHasNosuggest() throws IOException {
+        Path affix = writeAffix("NOSUGGEST A");
+        Path dictionary = writeDictionary("2", "word/A", "word");
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            assertTrue(hunspell.suggest("wrod").contains("word"));
+        }
+    }
+
+    @Test
+    void suggestFindsInsertionEditCandidate() throws IOException {
+        Path dictionary = writeDictionary("1", "cat");
+
+        try (Hunspell hunspell = Hunspell.builder().dictionary(dictionary).build()) {
+            assertIterableEquals(List.of("cat"), hunspell.suggest("ct"));
+        }
+    }
+
+    @Test
     void suffixSuggestReturnsDerivedWordsForRootPrefix() throws IOException {
         Path dictionary = writeDictionary("4", "run", "runner", "running", "outrun");
 
@@ -229,6 +257,13 @@ class HunspellBootstrapTest {
 
     private static Path writeDictionary(String... lines) throws IOException {
         Path file = Files.createTempFile("hunspell-java", ".dic");
+        Files.write(file, String.join(System.lineSeparator(), lines).concat(System.lineSeparator()).getBytes());
+        file.toFile().deleteOnExit();
+        return file;
+    }
+
+    private static Path writeAffix(String... lines) throws IOException {
+        Path file = Files.createTempFile("hunspell-java", ".aff");
         Files.write(file, String.join(System.lineSeparator(), lines).concat(System.lineSeparator()).getBytes());
         file.toFile().deleteOnExit();
         return file;
