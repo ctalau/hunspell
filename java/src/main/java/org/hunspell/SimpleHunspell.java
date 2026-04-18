@@ -48,33 +48,194 @@ final class SimpleHunspell implements Hunspell {
 
     @Override
     public List<String> suggest(String word) {
-        // Edit-stage candidate generation (delete/transpose/replace/insert),
-        // then C++-style flag filtering for forbidden suggestion classes.
+        // Mirrors the C++ `SuggestMgr::suggest` stage ordering: the REP table
+        // stage (`replchars`) runs before cheaper character-edit stages. The
+        // REP stage carries the highest signal (language-specific substitutions
+        // from the .aff file), so any suggestion it produces keeps its order
+        // ahead of edit-based fallbacks.
         String normalized = affixManager.normalizeLookupWord(word);
-        Set<String> candidates = new LinkedHashSet<>();
+        List<String> wlst = new ArrayList<>();
+        Set<String> seen = new LinkedHashSet<>();
+
+        replChars(normalized, wlst, seen);
+
+        // Edit-stage candidate generation (delete/transpose/replace/insert),
+        // kept as a fallback while the remaining C++ suggestion stages are
+        // ported. New suggestions are deduped against the REP-stage output so
+        // we never re-emit a candidate the REP stage already accepted.
         int noSuggestFlag = affixManager.noSuggestFlag();
         int forbiddenWordFlag = affixManager.forbiddenWordFlag();
         int onlyInCompoundFlag = affixManager.onlyInCompoundFlag();
         Set<Integer> alphabet = suggestionAlphabet();
+        List<String> editCandidates = new ArrayList<>();
         for (String candidate : edits(normalized, alphabet)) {
+            if (seen.contains(candidate)) {
+                continue;
+            }
             List<HashManager.Entry> entries = hashManager.lookup(candidate);
             for (HashManager.Entry entry : entries) {
                 if (!hasFlag(entry.flags(), noSuggestFlag)
                     && !hasFlag(entry.flags(), forbiddenWordFlag)
                     && !hasFlag(entry.flags(), onlyInCompoundFlag)) {
-                    candidates.add(candidate);
+                    editCandidates.add(candidate);
                     break;
                 }
             }
         }
-        List<String> ranked = new ArrayList<>(candidates);
-        ranked.sort(Comparator
+        editCandidates.sort(Comparator
             .comparingInt((String candidate) -> distance(word, candidate))
             .thenComparing(Comparator.naturalOrder()));
-        if (ranked.size() > maxSuggestions) {
-            ranked = ranked.subList(0, maxSuggestions);
+        for (String candidate : editCandidates) {
+            if (wlst.size() >= maxSuggestions) {
+                break;
+            }
+            if (seen.add(candidate)) {
+                wlst.add(candidate);
+            }
         }
-        return Collections.unmodifiableList(ranked);
+        if (wlst.size() > maxSuggestions) {
+            wlst = new ArrayList<>(wlst.subList(0, maxSuggestions));
+        }
+        return Collections.unmodifiableList(wlst);
+    }
+
+    /**
+     * Port of {@code SuggestMgr::replchars}. For every REP table entry, scan
+     * every occurrence of the pattern in {@code word}, compute the
+     * position-aware output (med/ini/fin/isol), and test the resulting
+     * candidate via {@link #checkSuggestWord}. If the candidate carries a
+     * space we also try the split variant: when the portion before the space
+     * is itself a known word, testing the portion after produces a suggestion
+     * that is then rewritten to the full space-joined candidate — matching the
+     * C++ {@code wlst[...] = candidate} rewrite.
+     */
+    private void replChars(String word, List<String> wlst, Set<String> seen) {
+        List<AffixManager.RepEntry> repTable = affixManager.repTable();
+        if (repTable.isEmpty() || word == null || word.length() < 2) {
+            return;
+        }
+        for (AffixManager.RepEntry entry : repTable) {
+            String pattern = entry.pattern();
+            if (pattern.isEmpty()) {
+                continue;
+            }
+            int patternLen = pattern.length();
+            int r = 0;
+            while ((r = word.indexOf(pattern, r)) >= 0) {
+                int type = (r == 0) ? 1 : 0;
+                if (r + patternLen == word.length()) {
+                    type += 2;
+                }
+                while (type != 0 && entry.outstring(type).isEmpty()) {
+                    type = (type == 2 && r != 0) ? 0 : type - 1;
+                }
+                String out = entry.outstring(type);
+                if (out.isEmpty()) {
+                    r++;
+                    continue;
+                }
+                String candidate = word.substring(0, r) + out + word.substring(r + patternLen);
+                testSug(wlst, seen, candidate);
+                int sp = candidate.indexOf(' ');
+                if (sp >= 0) {
+                    int prev = 0;
+                    while (sp >= 0) {
+                        String prevChunk = candidate.substring(prev, sp);
+                        if (spell(prevChunk)) {
+                            String postChunk = candidate.substring(sp + 1);
+                            int oldSize = wlst.size();
+                            if (testSug(wlst, seen, postChunk) && wlst.size() > oldSize) {
+                                // Replace the last candidate with the full
+                                // space-joined form, mirroring C++
+                                // `wlst[wlst.size() - 1] = candidate`.
+                                String inserted = wlst.remove(wlst.size() - 1);
+                                seen.remove(inserted);
+                                if (seen.add(candidate)) {
+                                    wlst.add(candidate);
+                                }
+                            }
+                        }
+                        prev = sp + 1;
+                        sp = candidate.indexOf(' ', prev);
+                    }
+                }
+                r++;
+            }
+            if (wlst.size() >= maxSuggestions) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * Mirrors the C++ {@code SuggestMgr::testsug} helper: only add
+     * {@code candidate} when it is a non-duplicate, valid suggestion per the
+     * {@link #checkSuggestWord} predicate.
+     */
+    private boolean testSug(List<String> wlst, Set<String> seen, String candidate) {
+        if (candidate == null || candidate.isEmpty()) {
+            return false;
+        }
+        if (wlst.size() >= maxSuggestions) {
+            return false;
+        }
+        if (seen.contains(candidate)) {
+            return false;
+        }
+        if (!checkSuggestWord(candidate)) {
+            return false;
+        }
+        seen.add(candidate);
+        wlst.add(candidate);
+        return true;
+    }
+
+    /**
+     * Mirrors the non-compound branch of {@code SuggestMgr::checkword}: the
+     * candidate must be spellable, and must not resolve exclusively to
+     * entries flagged NOSUGGEST / FORBIDDENWORD / ONLYINCOMPOUND. This keeps
+     * NOSUGGEST entries (e.g. profanity lists) out of the suggestion stream
+     * even though {@link #spell(String)} accepts them.
+     */
+    private boolean checkSuggestWord(String candidate) {
+        if (!spell(candidate)) {
+            return false;
+        }
+        int noSuggest = affixManager.noSuggestFlag();
+        int forbidden = affixManager.forbiddenWordFlag();
+        int onlyInCompound = affixManager.onlyInCompoundFlag();
+        String normalized = affixManager.normalizeLookupWord(candidate);
+        List<HashManager.Entry> direct = hashManager.lookup(normalized);
+        if (!direct.isEmpty()) {
+            boolean anyClean = false;
+            for (HashManager.Entry entry : direct) {
+                if (forbidden >= 0 && entry.hasFlag(forbidden)) {
+                    return false;
+                }
+                if (noSuggest >= 0 && entry.hasFlag(noSuggest)) {
+                    continue;
+                }
+                if (onlyInCompound >= 0 && entry.hasFlag(onlyInCompound)) {
+                    continue;
+                }
+                anyClean = true;
+            }
+            return anyClean;
+        }
+        HashManager.Entry hit = affixManager.affixCheck(normalized, hashManager);
+        if (hit == null) {
+            return true; // accepted via break/compound branch of spell()
+        }
+        if (forbidden >= 0 && hit.hasFlag(forbidden)) {
+            return false;
+        }
+        if (noSuggest >= 0 && hit.hasFlag(noSuggest)) {
+            return false;
+        }
+        if (onlyInCompound >= 0 && hit.hasFlag(onlyInCompound)) {
+            return false;
+        }
+        return true;
     }
 
     private Set<Integer> suggestionAlphabet() {

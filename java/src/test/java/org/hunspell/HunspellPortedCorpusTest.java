@@ -1688,7 +1688,97 @@ class HunspellPortedCorpusTest {
         assertAllRejected(Path.of("..", "tests", "utfcompound.aff").normalize(), Path.of("..", "tests", "utfcompound.dic").normalize(), Path.of("..", "tests", "utfcompound.wrong").normalize(), StandardCharsets.UTF_8);
     }
 
+    @Test
+    void repSuggest_patternReplacementProducesPhormToForm() {
+        // Mirrors C++ SuggestMgr::replchars: REP "ph f" rewrites "phorm" → "form",
+        // "form" is in rep.dic, so it must appear as a REP-stage suggestion.
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(hunspell.suggest("phorm").contains("form"));
+        }
+    }
 
+    @Test
+    void repSuggest_patternReplacementProducesFantomToPhantom() {
+        // REP "f ph" rewrites "fantom" → "phantom" at the ini (start-anchored
+        // fallback) position; "phantom" is in rep.dic.
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(hunspell.suggest("fantom").contains("phantom"));
+        }
+    }
+
+    @Test
+    void repSuggest_finAnchorRewritesVacashunAsVacation() {
+        // REP "shun$ tion" applies only when "shun" ends the word — mirrors
+        // the fin (`$`) anchor in HashMgr::parse_reptable / replentry.
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(hunspell.suggest("vacashun").contains("vacation"));
+        }
+    }
+
+    @Test
+    void repSuggest_isolAnchorRewritesFooAsBar() {
+        // REP "^foo$ bar" applies only when the whole word is "foo" (isol=3)
+        // — mirrors the `^`/`$` double-anchor handling in parse_reptable.
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(hunspell.suggest("foo").contains("bar"));
+        }
+    }
+
+    @Test
+    void repSuggest_spaceRewriteProducesSplitCandidate() {
+        // REP "^alot$ a_lot" rewrites "alot" → "a lot" after underscore→space
+        // translation; the candidate contains a space and only survives when
+        // both "a" and "lot" are dictionary words — the C++ replchars "space
+        // in candidate" branch.
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(hunspell.suggest("alot").contains("a lot"));
+        }
+    }
+
+    @Test
+    void repSuggest_apostropheToSpaceRewritesUnalunno() {
+        // REP "' _" maps any apostrophe to a space; "un'alunno" → "un alunno"
+        // where both halves are dictionary words.
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(hunspell.suggest("un'alunno").contains("un alunno"));
+        }
+    }
+
+    @Test
+    void repSuggest_finFallbackRewritesAutosAsAutoApostropheS() {
+        // REP "s 's" matches at any "s"; at the end of "autos" the fin slot is
+        // empty so C++ falls back to the med slot (type=0). Together with
+        // WORDCHARS ' and SFX A this produces "auto's" (the dictionary form).
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            assertTrue(hunspell.suggest("autos").contains("auto's"));
+        }
+    }
+
+    @Test
+    void repSuggest_repStageSuggestionsAppearAheadOfEditFallbacks() {
+        // C++ stage ordering places REP before character-edit stages, so REP
+        // suggestions must appear ahead of any later edit fallback.
+        try (Hunspell hunspell = Hunspell.builder().affix(REP_AFF).dictionary(REP_DIC).build()) {
+            List<String> suggestions = hunspell.suggest("phorm");
+            assertFalse(suggestions.isEmpty());
+            // "form" is the REP-driven suggestion; it should come first.
+            assertTrue(suggestions.indexOf("form") == 0,
+                () -> "Expected 'form' to be the first suggestion, got: " + suggestions);
+        }
+    }
+
+    @Test
+    void repSuggest_nosuggestFlaggedCandidatesAreExcluded() {
+        // When the candidate produced by a REP substitution is flagged
+        // NOSUGGEST it must not surface in the suggestion list, matching the
+        // C++ checkword filter used by replchars via testsug.
+        try (Hunspell hunspell = Hunspell.builder()
+                .affix(Path.of("..", "tests", "nosuggest.aff").normalize())
+                .dictionary(Path.of("..", "tests", "nosuggest.dic").normalize())
+                .build()) {
+            assertFalse(hunspell.suggest("foox").contains("foo"));
+        }
+    }
 
     private static void assertConditionAccepted(String word) {
         try (Hunspell hunspell = Hunspell.builder().affix(CONDITION_AFF).dictionary(CONDITION_DIC).build()) {
