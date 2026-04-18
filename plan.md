@@ -250,6 +250,16 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
   `SPELL_COMPOUND`/`SPELL_FORBIDDEN` semantics in `src/hunspell/hunspell.cxx`).
   Added three bootstrap parity tests covering `onlyincompound`, `forbiddenword`,
   and `break` fixtures.
+- Session progress (this work): addressed backlog gap #4 (parity test-depth
+  hardening) by adding 13 new full-corpus parity tests for previously
+  untested fixtures that already pass in the Java implementation
+  (`base.good`, `break.good`, `checkcompoundcase2.good`,
+  `checkcompoundcaseutf.wrong`, `checkcompoundpattern.good`,
+  `checkcompoundrep.good`, `complexprefixes.good`,
+  `complexprefixesutf.good`, `dotless_i.wrong`, `needaffix.wrong`,
+  `nepali.good`, `simplifiedtriple.wrong`, `utfcompound.wrong`). Java suite
+  totals increased from 251 to 264 passing tests (still 2 intentionally
+  skipped timelimit stress tests).
 - Session progress (this work): closed a meaningful portion of backlog gap #2
   by porting four additional affix directives with runtime parity:
   * `CHECKCOMPOUNDDUP` — matches the C++ `rv != rv_first` duplicate check in

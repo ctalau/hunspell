@@ -7,14 +7,14 @@ Total tests: **140**
 - [x] `affixes.dic` *(ported subset passing in Java: full `affixes.good` corpus assertions plus direct PFX×SFX cross-product checks (`rework`/`worked`/`reworked`/`tried`))*
 - [x] `condition.dic` *(ported subset passing in Java: full `condition.good`/`condition.wrong` corpus assertions plus targeted direct checks; accepted and rejected branches are covered and passing)*
 - [x] `condition_utf.dic` *(ported subset passing in Java: full `condition_utf.good`/`condition_utf.wrong` corpus assertions plus 10 explicit direct UTF acceptance/rejection tests are passing with charset-aware loading)*
-- [x] `base.dic` *(ported subset passing in Java: explicit acceptance/rejection checks for affixed forms, case variants, and trailing-dot tokens from `base.good`/`base.wrong`)*
+- [x] `base.dic` *(ported subset passing in Java: full `base.good` corpus acceptance assertions plus explicit acceptance/rejection checks for affixed forms, case variants, and trailing-dot tokens from `base.good`/`base.wrong`)*
 - [x] `base_utf.dic` *(ported subset passing in Java: explicit acceptance checks for `created`/`uncreated`/`conveyed`/`FAQs`/`Hello`/`HELLO`/`NASA` and rejection of misspelled forms (`loooked`/`hlelo`/`tomorow`/`Nasa`))*
 - [x] `allcaps.dic` *(ported subset passing in Java: full `allcaps.wrong` corpus rejection assertions are passing for all-caps casing regressions not yet accepted by current Java casing pipeline)*
 - [x] `allcaps_utf.dic` *(ported subset passing in Java: full `allcaps_utf.wrong` corpus rejection assertions are passing for UTF all-caps casing regressions not yet accepted by current Java casing pipeline)*
 - [x] `allcaps2.dic` *(ported subset passing in Java: full `allcaps2.wrong` corpus rejection assertions are passing for second all-caps fixture negative paths)*
 - [x] `allcaps3.dic` *(ported subset passing in Java: full `allcaps3.good`/`allcaps3.wrong` corpus assertions are passing for all-caps acceptance/rejection behavior in this fixture)*
 - [x] `keepcase.dic` *(ported subset passing in Java: full `keepcase.good` corpus acceptance assertions plus full `keepcase.wrong` corpus rejection assertions are passing — KEEPCASE flag now cancels case-fallback acceptance, mirroring C++ `is_keepcase` in `AffixMgr`)*
-- [x] `dotless_i.dic` *(ported subset passing in Java: direct Turkish dotless/dotted-I checks are passing for accepted forms (`Diyarbakır`, `iç`, `ışık`) and rejected forms (`Diyarbakir`, `DIYARBAKIR`, `İşık`, `İŞIK`))*
+- [x] `dotless_i.dic` *(ported subset passing in Java: full `dotless_i.wrong` corpus rejection assertions plus direct Turkish dotless/dotted-I checks are passing for accepted forms (`Diyarbakır`, `iç`, `ışık`) and rejected forms (`Diyarbakir`, `DIYARBAKIR`, `İşık`, `İŞIK`))*
 - [x] `i58202.dic` *(ported subset passing in Java: full `i58202.good` corpus acceptance assertions are passing for this regression fixture)*
 - [x] `map.dic` *(ported subset passing in Java: full `map.wrong` corpus assertions are passing for MAP-based negative acceptance checks in this fixture)*
 - [x] `rep.dic` *(ported subset passing in Java: full `rep.wrong` corpus assertions are passing for REP-based negative acceptance checks in this fixture)*
@@ -36,8 +36,8 @@ Total tests: **140**
 - [x] `alias2.dic` *(ported subset passing in Java: full `alias2.good` corpus assertions are passing, covering AF flag-vector aliases plus AM-tagged entries with continuation-driven derivations (`foox`, `fooy`, `fooyx`))*
 - [x] `alias3.dic` *(ported subset passing in Java: full `alias3.good` corpus assertions are passing, including `COMPLEXPREFIXES` + AF continuation alias chaining (`tekmetouro`) and WORDCHARS underscore suffix form (`ouro_test_`))*
 - [x] `breakdefault.dic` *(ported subset passing in Java: full `breakdefault.wrong` corpus rejection assertions are passing for BREAK default negative paths)*
-- [x] `break.dic` *(ported subset passing in Java: recursive hyphen/n-dash split acceptance (`foo-bar`, `foo–bar`, `foo-bar-foo-bar`, `e-mail-foo`) plus full `break.wrong` corpus rejection; leverages FORBIDDENWORD short-circuit for `foo-baz`)*
-- [x] `needaffix.dic` *(ported subset passing in Java: direct checks covering bare stem rejection (`foo` rejected via NEEDAFFIX flag) and affixed-form acceptance (`foos`, `bar`))*
+- [x] `break.dic` *(ported subset passing in Java: full `break.good` corpus acceptance plus full `break.wrong` corpus rejection assertions; also direct recursive hyphen/n-dash split acceptance (`foo-bar`, `foo–bar`, `foo-bar-foo-bar`, `e-mail-foo`), leveraging FORBIDDENWORD short-circuit for `foo-baz`)*
+- [x] `needaffix.dic` *(ported subset passing in Java: full `needaffix.wrong` corpus rejection assertions plus direct checks covering bare stem rejection (`foo` rejected via NEEDAFFIX flag) and affixed-form acceptance (`foos`, `bar`))*
 - [x] `needaffix2.dic` *(ported subset passing in Java: full `needaffix2.good` corpus assertions are passing, covering NEEDAFFIX acceptance paths in this fixture)*
 - [x] `needaffix3.dic` *(ported subset passing in Java: full `needaffix3.good` corpus acceptance assertions are passing for NEEDAFFIX3 positive derivations)*
 - [x] `needaffix4.dic` *(ported subset passing in Java: full `needaffix4.good` corpus assertions are passing, covering extended NEEDAFFIX interactions in this fixture)*
@@ -45,9 +45,9 @@ Total tests: **140**
 - [x] `circumfix.dic` *(ported subset passing in Java: full `circumfix.good`/`circumfix.wrong` corpus assertions are passing for CIRCUMFIX acceptance/rejection behavior in this fixture)*
 - [x] `fogemorpheme.dic` *(ported subset passing in Java: direct checks are passing for accepted stems (`gata`, `kontoret`) and rejected compound-order forms (`gatakontoret`, `kontoretgatu`))*
 - [x] `onlyincompound.dic` *(ported subset passing in Java: full `onlyincompound.good`/`onlyincompound.wrong` corpus assertions are passing, covering standalone `ONLYINCOMPOUND` rejection (`pseudo`, `pseudos`) and compound acceptance (`pseudofoo`, `foopseudo`, `foopseudos`))*
-- [x] `complexprefixes.dic` *(ported subset passing in Java: full `complexprefixes.wrong` corpus rejection assertions are passing for complex-prefix negative paths)*
+- [x] `complexprefixes.dic` *(ported subset passing in Java: full `complexprefixes.good` corpus acceptance plus full `complexprefixes.wrong` corpus rejection assertions are passing for complex-prefix positive and negative paths)*
 - [x] `complexprefixes2.dic` *(ported subset passing in Java: full `complexprefixes2.good` corpus assertions are passing for second complex-prefix fixture positive paths)*
-- [x] `complexprefixesutf.dic` *(ported subset passing in Java: full `complexprefixesutf.wrong` corpus rejection assertions are passing for UTF complex-prefix negative paths)*
+- [x] `complexprefixesutf.dic` *(ported subset passing in Java: full `complexprefixesutf.good` corpus acceptance plus full `complexprefixesutf.wrong` corpus rejection assertions are passing for UTF complex-prefix positive and negative paths)*
 - [x] `conditionalprefix.dic` *(ported subset passing in Java: full `conditionalprefix.good`/`conditionalprefix.wrong` corpus assertions are passing for conditional prefix acceptance/rejection behavior)*
 - [x] `zeroaffix.dic` *(ported subset passing in Java: full `zeroaffix.good` corpus assertions are passing, covering zero-strip affix application acceptance)*
 - [x] `utf8.dic` *(ported subset passing in Java: full `utf8.good` corpus assertions are passing with UTF-8 corpus loading)*
@@ -70,16 +70,16 @@ Total tests: **140**
 - [x] `checkcompounddup.dic` *(ported subset passing in Java: full `checkcompounddup.good` corpus acceptance assertions plus full `checkcompounddup.wrong` corpus rejection assertions are passing — CHECKCOMPOUNDDUP now rejects terminal 2-word duplicate splits while allowing 3-word compounds like `foofoobar`, mirroring C++ `rv != rv_first` in `AffixMgr::compound_check`)*
 - [x] `checkcompoundtriple.dic` *(ported subset passing in Java: full `checkcompoundtriple.good` corpus acceptance assertions plus full `checkcompoundtriple.wrong` corpus rejection assertions are passing — CHECKCOMPOUNDTRIPLE now rejects splits where the boundary creates three identical consecutive characters)*
 - [x] `checkcompoundcase.dic` *(ported subset passing in Java: full `checkcompoundcase.good` corpus acceptance assertions plus full `checkcompoundcase.wrong` corpus rejection assertions are passing — CHECKCOMPOUNDCASE now rejects uppercase-adjacent boundaries with dash exception, mirroring C++ `cpdcase_check`)*
-- [x] `simplifiedtriple.dic` *(ported subset passing in Java: direct acceptance checks are passing for baseline compound stems (`glass`, `sko`))*
-- [x] `checkcompoundrep.dic` *(ported subset passing in Java: full `checkcompoundrep.wrong` corpus rejection assertions are passing for replacement-constrained compound negative paths)*
+- [x] `simplifiedtriple.dic` *(ported subset passing in Java: full `simplifiedtriple.wrong` corpus rejection assertions plus direct acceptance checks are passing for baseline compound stems (`glass`, `sko`))*
+- [x] `checkcompoundrep.dic` *(ported subset passing in Java: full `checkcompoundrep.good` corpus acceptance plus full `checkcompoundrep.wrong` corpus rejection assertions are passing for replacement-constrained compound positive and negative paths)*
 - [x] `checkcompoundrep2.dic` *(ported subset passing in Java: full `checkcompoundrep2.good` corpus assertions are passing for compound replacement-constraint behavior in this fixture)*
-- [x] `checkcompoundcase2.dic` *(ported subset passing in Java: full `checkcompoundcase2.wrong` corpus rejection assertions are passing for case-sensitive compound negative paths)*
-- [x] `checkcompoundcaseutf.dic` *(ported subset passing in Java: full `checkcompoundcaseutf.good` corpus acceptance assertions are passing for UTF case-sensitive compound positive paths)*
-- [x] `checkcompoundpattern.dic` *(ported subset passing in Java: full `checkcompoundpattern.wrong` corpus rejection assertions are passing for pattern-constrained compound negative paths)*
+- [x] `checkcompoundcase2.dic` *(ported subset passing in Java: full `checkcompoundcase2.good` corpus acceptance plus full `checkcompoundcase2.wrong` corpus rejection assertions are passing for case-sensitive compound positive and negative paths)*
+- [x] `checkcompoundcaseutf.dic` *(ported subset passing in Java: full `checkcompoundcaseutf.good` corpus acceptance plus full `checkcompoundcaseutf.wrong` corpus rejection assertions are passing for UTF case-sensitive compound positive and negative paths)*
+- [x] `checkcompoundpattern.dic` *(ported subset passing in Java: full `checkcompoundpattern.good` corpus acceptance plus full `checkcompoundpattern.wrong` corpus rejection assertions are passing for pattern-constrained compound positive and negative paths)*
 - [x] `checkcompoundpattern2.dic` *(ported subset passing in Java: direct acceptance check is passing for `barfoo` from `checkcompoundpattern2.good`)*
 - [x] `checkcompoundpattern3.dic` *(ported subset passing in Java: direct checks are passing for accepted compounds (`barfoo`, `banfoo`, `banbar`, `foobar`, `fooban`, `foobanbar`, `boobar`, `boobarfoo`) and rejected compounds (`fozar`, `fozarfoo`, `fozan`, `fozanfoo`, `bozar`, `bozarfoo`))*
 - [x] `checkcompoundpattern4.dic` *(ported subset passing in Java: direct baseline stem acceptance checks are passing for fixture dictionary entries (`sUrya`, `udayaM`, `pEru`, `unna`))*
-- [x] `utfcompound.dic` *(ported subset passing in Java: full `utfcompound.good` corpus assertions are passing for UTF compound acceptance paths in this fixture)*
+- [x] `utfcompound.dic` *(ported subset passing in Java: full `utfcompound.good` corpus acceptance plus full `utfcompound.wrong` corpus rejection assertions are passing for UTF compound positive and negative paths in this fixture)*
 - [x] `checksharps.dic` *(ported subset passing in Java: full `checksharps.wrong` corpus rejection assertions are passing for German sharp-s negative paths)*
 - [x] `checksharpsutf.dic` *(ported subset passing in Java: full `checksharpsutf.wrong` corpus rejection assertions are passing for UTF German sharp-s negative paths)*
 - [x] `germancompounding.dic` *(ported subset passing in Java: full `germancompounding.good` corpus acceptance assertions are passing for German compounding positive paths)*
@@ -129,7 +129,7 @@ Total tests: **140**
 - [x] `2999225.dic` *(ported subset passing in Java: full `2999225.good` corpus assertions are passing, including `COMPOUNDBEGIN`/`COMPOUNDEND` acceptance path (`foobaz`) alongside COMPOUNDRULE path (`foobar`))*
 - [x] `onlyincompound2.dic` *(ported subset passing in Java: full `onlyincompound2.good` corpus acceptance assertions are passing for second ONLYINCOMPOUND fixture positive paths)*
 - [x] `forceucase.dic` *(ported subset passing in Java: direct baseline acceptance checks are passing for (`foo`, `bar`, `baz`, `foobar`, `foobazbar`))*
-- [x] `nepali.dic` *(ported subset passing in Java: full `nepali.wrong` corpus rejection assertions are passing for Nepali negative paths)*
+- [x] `nepali.dic` *(ported subset passing in Java: full `nepali.good` corpus acceptance plus full `nepali.wrong` corpus rejection assertions are passing for Nepali positive and negative paths)*
 - [x] `hu.dic` *(ported subset passing in Java: direct acceptance checks (`majomkenyér`, `majomkenyérfaág`, `Batthyány-Strattmann-nal`, `forró`) and rejection check (`forróvíz`) are passing)*
 - [x] `warn.dic` *(ported subset passing in Java: full `warn.good` corpus assertions are passing for WARN-flag fixture behavior)*
 - [x] `timelimit.dic` *(ported subset passing in Java: direct long-numeric acceptance check (`1000000000000000000000`) is passing; stress-oriented wrong-path corpus remains covered by intentionally disabled runtime-stability tests in Java suite)*
