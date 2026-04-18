@@ -40,12 +40,16 @@ final class AffixManager {
     private int forbiddenWordFlag = -1;
     private int noSuggestFlag = -1;
     private int needAffixFlag = -1;
+    private int keepCaseFlag = -1;
     private int onlyInCompoundFlag = -1;
     private int compoundFlag = -1;
     private int compoundBeginFlag = -1;
     private int compoundEndFlag = -1;
     private int compoundMin = 3;
     private final List<int[]> compoundRules = new ArrayList<>();
+    private boolean checkCompoundDup;
+    private boolean checkCompoundTriple;
+    private boolean checkCompoundCase;
     private final List<String> breakTable = new ArrayList<>();
     private final IconvTable inputConversions = new IconvTable();
     private boolean breakTableExplicit;
@@ -86,6 +90,10 @@ final class AffixManager {
         return needAffixFlag;
     }
 
+    int keepCaseFlag() {
+        return keepCaseFlag;
+    }
+
     int noSuggestFlag() {
         return noSuggestFlag;
     }
@@ -112,6 +120,18 @@ final class AffixManager {
 
     List<int[]> compoundRules() {
         return Collections.unmodifiableList(compoundRules);
+    }
+
+    boolean checkCompoundDup() {
+        return checkCompoundDup;
+    }
+
+    boolean checkCompoundTriple() {
+        return checkCompoundTriple;
+    }
+
+    boolean checkCompoundCase() {
+        return checkCompoundCase;
     }
 
     List<String> breakTable() {
@@ -230,8 +250,35 @@ final class AffixManager {
                 needAffixFlag = Flags.decodeSingle(parts[1], flagMode);
                 continue;
             }
+            if ("KEEPCASE".equals(parts[0]) && parts.length >= 2) {
+                // Mirrors C++ `AffixMgr::parse_file` KEEPCASE flag wiring.
+                // Used by `HunspellImpl::spell` to reject case-normalized
+                // acceptance when the matched entry is flagged KEEPCASE.
+                keepCaseFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
             if ("NOSUGGEST".equals(parts[0]) && parts.length >= 2) {
                 noSuggestFlag = Flags.decodeSingle(parts[1], flagMode);
+                continue;
+            }
+            if ("CHECKCOMPOUNDDUP".equals(parts[0])) {
+                // Mirrors C++ affixmgr.cxx CHECKCOMPOUNDDUP: forbid compounds
+                // whose adjacent dictionary words are identical (e.g., `foofoo`).
+                checkCompoundDup = true;
+                continue;
+            }
+            if ("CHECKCOMPOUNDTRIPLE".equals(parts[0])) {
+                // Mirrors C++ affixmgr.cxx CHECKCOMPOUNDTRIPLE: forbid compounds
+                // whose boundary produces three consecutive identical letters
+                // spanning the join (e.g., `foo`+`opera` → `fooopera`).
+                checkCompoundTriple = true;
+                continue;
+            }
+            if ("CHECKCOMPOUNDCASE".equals(parts[0])) {
+                // Mirrors C++ affixmgr.cxx CHECKCOMPOUNDCASE: forbid compounds
+                // whose boundary has an uppercase letter on either side
+                // (cpdcase_check), unless one side is a dash.
+                checkCompoundCase = true;
                 continue;
             }
             if ("ONLYINCOMPOUND".equals(parts[0]) && parts.length >= 2) {

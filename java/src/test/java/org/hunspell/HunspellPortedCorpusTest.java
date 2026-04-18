@@ -1082,6 +1082,14 @@ class HunspellPortedCorpusTest {
     }
 
     @Test
+    void keepcaseCorpusWrong_allWordsRejected() {
+        // Mirrors C++ KEEPCASE semantics in `HunspellImpl::spell`: words whose
+        // matched entry has KEEPCASE may not be accepted via ALLCAP/INITCAP
+        // case-fallback, so `Foo`/`FOO`/`BAR`/`Baz.`/`QUUX.` are rejected.
+        assertAllRejected(Path.of("..", "tests", "keepcase.aff").normalize(), Path.of("..", "tests", "keepcase.dic").normalize(), Path.of("..", "tests", "keepcase.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
     void aliasCorpusGood_allWordsAccepted() {
         assertAllAccepted(Path.of("..", "tests", "alias.aff").normalize(), Path.of("..", "tests", "alias.dic").normalize(), Path.of("..", "tests", "alias.good").normalize(), StandardCharsets.ISO_8859_1);
     }
@@ -1439,10 +1447,25 @@ class HunspellPortedCorpusTest {
         assertAllAccepted(Path.of("..", "tests", "checkcompounddup.aff").normalize(), Path.of("..", "tests", "checkcompounddup.dic").normalize(), Path.of("..", "tests", "checkcompounddup.good").normalize(), StandardCharsets.ISO_8859_1);
     }
 
+    @Test
+    void checkcompounddupCorpusWrong_allWordsRejected() {
+        // Mirrors C++ CHECKCOMPOUNDDUP semantics: forbid 2-word compound pairs
+        // whose adjacent parts are identical (`foofoo`, `foofoofoo`, `foobarbar`).
+        assertAllRejected(Path.of("..", "tests", "checkcompounddup.aff").normalize(), Path.of("..", "tests", "checkcompounddup.dic").normalize(), Path.of("..", "tests", "checkcompounddup.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
 
     @Test
     void checkcompoundtripleCorpusGood_allWordsAccepted() {
         assertAllAccepted(Path.of("..", "tests", "checkcompoundtriple.aff").normalize(), Path.of("..", "tests", "checkcompoundtriple.dic").normalize(), Path.of("..", "tests", "checkcompoundtriple.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompoundtripleCorpusWrong_allWordsRejected() {
+        // Mirrors C++ CHECKCOMPOUNDTRIPLE semantics: forbid compound splits
+        // that produce three consecutive identical letters over the boundary
+        // (e.g., `foo`+`opera` → `fooopera`, `bare`+`eel` → `bareeel`).
+        assertAllRejected(Path.of("..", "tests", "checkcompoundtriple.aff").normalize(), Path.of("..", "tests", "checkcompoundtriple.dic").normalize(), Path.of("..", "tests", "checkcompoundtriple.wrong").normalize(), StandardCharsets.ISO_8859_1);
     }
 
 
@@ -1458,6 +1481,20 @@ class HunspellPortedCorpusTest {
     @Test
     void checkcompoundcase2CorpusWrong_allWordsRejected() {
         assertAllRejected(Path.of("..", "tests", "checkcompoundcase2.aff").normalize(), Path.of("..", "tests", "checkcompoundcase2.dic").normalize(), Path.of("..", "tests", "checkcompoundcase2.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompoundcaseCorpusGood_allWordsAccepted() {
+        // Mirrors C++ CHECKCOMPOUNDCASE `cpdcase_check` accept path: compounds
+        // whose boundary has a dash (or where both sides are lower) are OK.
+        assertAllAccepted(Path.of("..", "tests", "checkcompoundcase.aff").normalize(), Path.of("..", "tests", "checkcompoundcase.dic").normalize(), Path.of("..", "tests", "checkcompoundcase.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompoundcaseCorpusWrong_allWordsRejected() {
+        // Mirrors C++ CHECKCOMPOUNDCASE reject path: `fooBar`, `BAZBar`,
+        // `BAZfoo` all have uppercase on a boundary side without a dash.
+        assertAllRejected(Path.of("..", "tests", "checkcompoundcase.aff").normalize(), Path.of("..", "tests", "checkcompoundcase.dic").normalize(), Path.of("..", "tests", "checkcompoundcase.wrong").normalize(), StandardCharsets.ISO_8859_1);
     }
 
     @Test

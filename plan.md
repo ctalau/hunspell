@@ -216,7 +216,7 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 ---
 
 ## Cross-phase gap-closure backlog (spec alignment + TDD)
-**Status: 🟡 In progress (planning complete, implementation pending)**
+**Status: 🟡 In progress (gaps #1 and partial #2 landed)**
 
 ### Spec alignment check
 - `spec.md` already requires rich `SpellResult` (`compound`, `forbidden`, `root`) and ranked suggestion compatibility,
@@ -225,10 +225,10 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
   are treated as post-Phase-5 backlog and must be introduced only with C++-matching behavior.
 
 ### TDD backlog by gap
-1. **Spell info-bit parity (`check()`):**
+1. **Spell info-bit parity (`check()`):** ✅ Landed
    - Red: add failing tests asserting `compound=true` for accepted compounds and `forbidden=true` for explicit forbidden matches.
    - Green: propagate internal spell-info states through lookup/compound paths into `SpellResult`.
-2. **Affix directive coverage parity:**
+2. **Affix directive coverage parity:** 🟡 Partially landed (CHECKCOMPOUNDDUP/TRIPLE/CASE + KEEPCASE done; CHECKCOMPOUNDREP/NONGRAMSUGGEST remain; NOSUGGEST previously done)
    - Red: fixture-backed failing tests for directives currently unimplemented in Java parser/runtime path
      (`CHECKCOMPOUNDDUP`, `CHECKCOMPOUNDREP`, `CHECKCOMPOUNDTRIPLE`, `CHECKCOMPOUNDCASE`, `NOSUGGEST`, `NONGRAMSUGGEST`).
    - Green: port C++ parsing and runtime checks in directive order from `affixmgr.cxx`.
@@ -238,6 +238,38 @@ Current state is intentionally transitional: most logic is in `SimpleHunspell` a
 4. **Parity test-depth hardening:**
    - Red: replace subset-only fixture checks with fuller oracle comparisons where deterministic.
    - Green: enable previously disabled deterministic portions (including timelimit-safe subsets) without regressions.
+
+### Implementation progress
+- Session progress (this work): closed backlog gap #1 by propagating
+  `SPELL_COMPOUND` and `SPELL_FORBIDDEN` info bits through `SpellResult`.
+  Introduced an internal `SpellInfo` record in `SimpleHunspell` (`correct`,
+  `compound`, `forbidden`, `stem`) returned from `resolveInfo()`/compound/break
+  paths, so `check(word)` now reports `compound=true` for accepted compound
+  segmentations and break-recursion acceptances, and `forbidden=true` for
+  explicit forbidden-flag matches (mirroring C++ `HunspellImpl::spell`
+  `SPELL_COMPOUND`/`SPELL_FORBIDDEN` semantics in `src/hunspell/hunspell.cxx`).
+  Added three bootstrap parity tests covering `onlyincompound`, `forbiddenword`,
+  and `break` fixtures.
+- Session progress (this work): closed a meaningful portion of backlog gap #2
+  by porting four additional affix directives with runtime parity:
+  * `CHECKCOMPOUNDDUP` — matches the C++ `rv != rv_first` duplicate check in
+    `AffixMgr::compound_check` (`src/hunspell/affixmgr.cxx`), applied only at
+    the terminal 2-word accept branch so 3+ word compounds are validated via
+    per-level recursion exactly as in C++ (verified `foofoobar` accepts while
+    `foofoo`/`foofoofoo`/`foobarbar` reject).
+  * `CHECKCOMPOUNDTRIPLE` — rejects compounds where the split point creates
+    three consecutive identical characters across the boundary, matching C++
+    triple-letter compound rejection.
+  * `CHECKCOMPOUNDCASE` — rejects compounds where an uppercase letter is
+    adjacent to the split boundary (with dash exception), mirroring C++
+    `cpdcase_check`.
+  * `KEEPCASE` — marks dictionary entries that must preserve their declared
+    case, and now cancels ALLCAP/INITCAP case-fallback acceptance in
+    `resolveInfo`, matching C++ `is_keepcase(rv)` rejection.
+  Added five ported-corpus parity tests covering `checkcompounddup.wrong`,
+  `checkcompoundtriple.wrong`, `checkcompoundcase.good`/`.wrong`, and
+  `keepcase.wrong`. Java suite totals increased from 243 to 251 passing tests
+  (still 2 intentionally skipped timelimit stress tests).
 
 ---
 
