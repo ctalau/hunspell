@@ -1,53 +1,93 @@
-# C++ vs Java implementation gap analysis (2026-04-11)
+# C++ vs Java implementation gap analysis (re-analysis: 2026-04-18)
 
-This document summarizes the highest-impact parity gaps between the C++ Hunspell implementation (`src/hunspell/*.cxx`) and the Java port (`java/src/main/java/org/hunspell/*`).
+This pass focuses on **algorithmic fidelity gaps** where the Java port still uses
+simplified or hardcoded behavior instead of the C++ Hunspell control flow.
 
-## 1) Suggestion engine is still non-parity
+## High-impact hardcoded / non-parity behavior
 
-- Java `suggest()` is explicitly a Levenshtein sort over dictionary stems and does **not** implement Hunspell's staged `SuggestMgr` flow (`REP`, `MAP`, `PHONE`, n-gram fallback, capitalization transforms, and time-limit behavior).
-- Java `suffixSuggest()` currently filters stems by `startsWith` and lexical sort, while C++ delegates to suffix-rule-based generation/suggestion logic.
+## 1) Suggestion pipeline is still heuristic, not `SuggestMgr`
 
-**Impact:** Ranked suggestions and suggestion recall can diverge materially from C++ for many real dictionaries even when spell acceptance/rejection matches.
+**Where:** `SimpleHunspell.suggest`, `suggestionAlphabet`, `edits`, `distance`, `suffixSuggest`.
 
-## 2) Spell info bits are not surfaced in Java `check()`
+- Java currently generates only one-edit candidates (delete/transpose/replace/insert)
+  from an alphabet built from dictionary stems, then ranks by Levenshtein distance +
+  lexical tie-break.
+- C++ uses staged suggestion logic (`SuggestMgr`) with REP/MAP/PHONE, capitalization
+  transforms, n-gram scoring, and time-limit gating.
+- `suffixSuggest` is currently a `startsWith` + sort helper, not an affix/suggestion parity path.
 
-- C++ `spell()` supports info bits (`SPELL_COMPOUND`, `SPELL_FORBIDDEN`) and root output.
-- Java `check()` returns `SpellResult(correct, false, false, rootOrNull)` and does not currently propagate compound/forbidden info.
+**Why this is hardcoded:** ranking and recall are determined by a Java-specific heuristic,
+not by C++ algorithm stages.
 
-**Impact:** API consumers cannot distinguish accepted-compound vs normal words, and cannot detect forbidden-word cases through `check()` parity semantics.
+## 2) Compound validation is partially modeled with a reduced rule set
 
-## 3) Affix directive coverage remains partial vs C++ parser breadth
+**Where:** `SimpleHunspell.compoundCheck*`, `sequenceMatchesRules`, `sequenceMatchesBeginEnd`.
 
-- C++ `AffixMgr` parses many directives, including `CHECKCOMPOUNDDUP`, `CHECKCOMPOUNDREP`, `CHECKCOMPOUNDTRIPLE`, `CHECKCOMPOUNDCASE`, `NOSUGGEST`, and `NONGRAMSUGGEST` among others.
-- Java `AffixManager.parseBody()` currently handles a focused subset (`WORDCHARS`, `COMPLEXPREFIXES`, `IGNORE`, `FORBIDDENWORD`, `NEEDAFFIX`, compound core flags/rules, `AF`, `ICONV`, `BREAK`, `PFX/SFX`).
+- Java implements a recursive splitter with `COMPOUNDMIN`, `COMPOUNDRULE`, plus select checks
+  (`CHECKCOMPOUNDDUP/TRIPLE/CASE`) and a begin/end fallback.
+- C++ compound acceptance includes broader directive interactions and more nuanced boundary/path
+  checks in `AffixMgr::compound_check`.
 
-**Impact:** Some compound and suggestion constraints that are data-driven in C++ are either absent or approximated in Java.
+**Why this is hardcoded:** the Java branch encodes a narrowed acceptance model that matches many
+fixtures but does not yet port all data-driven C++ checks.
 
-## 4) Morphology/runtime mutation API surface is still narrower than C++
+## 3) Case handling is simplified and locale-agnostic
 
-- C++ exposes `stem(vector<morph>)` and runtime `add_with_flags(word, flags, desc)`.
-- Java exposes `stem(String)` and runtime mutation via `add`, `addWithAffix`, `remove` only.
+**Where:** `SimpleHunspell.isTitleCase`, `isAllUpper`, `capitalize`, `resolveInfo` case ladder.
 
-**Impact:** Certain C++ workflows are unavailable in Java without extra compatibility wrappers.
+- Java uses basic Unicode char-case checks and `Locale.ROOT` lower/capitalize fallback.
+- C++ relies on `csutil` language-aware and dictionary-driven casing behavior.
 
-## 5) Test parity is broad but still subset-oriented in many fixtures
+**Why this is hardcoded:** casing outcomes are based on generic Java transformations rather than
+Hunspell's language/encoding-sensitive casing pipeline.
 
-- `tests.md` marks all C++ fixtures checked, but most entries are explicitly called out as "ported subset" and some scenarios remain intentionally disabled/non-deterministic in Java (`timelimit` stress tests).
+## 4) BREAK recursion logic is reduced vs C++ branching
 
-**Impact:** Checklist completion does not yet imply full oracle-equivalent line-by-line parity for every fixture path.
+**Where:** `SimpleHunspell.spellBreak`, `resolveStemForBreak`.
 
-## Spec coverage check: are these gaps also present in `spec.md`?
+- Java mirrors core recursion but uses simplified anchor handling and direct early exits.
+- C++ break handling has deeper integration with spell state/info propagation and branch behavior.
 
-Short answer: **mostly no** for requirements, **yes** for some API-surface parity details.
+**Why this is hardcoded:** behavior is approximated in Java helper methods instead of porting the
+full C++ branch structure and info-bit flow.
 
-- Suggestion parity and ranked ordering are already required by the spec (see suggestion order compatibility goals), so this is an implementation gap rather than a spec gap.
-- `SpellResult.compound()` / `SpellResult.forbidden()` are already specified, so this is an implementation gap rather than a spec gap.
-- Broad C++ API parity items like `add_with_flags` and `stem(vector<morph>)` are not explicitly included in the minimal v1 API section; these are spec-scope gaps that should be tracked as post-v1 or explicit extensions.
+## 5) Affix parser coverage is selective (many directives still absent)
 
-## Recommended implementation order
+**Where:** `AffixManager.parseBody`.
 
-1. **Phase 2 suggestion parity port** (highest product impact): port C++ `HunspellImpl::suggest` + `SuggestMgr` control flow and ranking.
-2. **Propagate spell info bits to `SpellResult`** from Java spell pipeline.
-3. **Expand affix directives** to cover missing compound/suggestion controls in parser + runtime checks.
-4. **Close API deltas** (`addWithFlags`, morphology-based stemming overload) once behavior is parity-safe.
-5. **Replace subset-only corpus checks** with fuller fixture assertions where deterministic.
+- Java parses core directives used by many current fixtures.
+- Numerous C++ directives and interactions remain unported (notably suggestion- and
+  compound-related controls beyond the currently handled subset).
+
+**Why this is hardcoded:** current runtime behavior depends on a selected directive subset rather
+than the full C++ parser/feature matrix.
+
+## 6) API behavior contains compatibility stubs
+
+**Where:** `SimpleHunspell.BuilderImpl.key`, `strictAffixParsing`, `info`.
+
+- `key(...)` and `strictAffixParsing(...)` are currently no-op pass-throughs.
+- `info()` currently returns hardcoded `("java-port-dev", 0)` metadata portions.
+
+**Why this is hardcoded:** these are placeholders rather than parity implementations.
+
+## 7) Morph generation path is simplified and brute-force
+
+**Where:** `SimpleHunspell.generate2`.
+
+- Java scans all dictionary entries and matches morphology by string containment.
+- C++ generation/stemming flows operate through richer morph/flag pathways.
+
+**Why this is hardcoded:** algorithm uses global scan + direct token matching instead of the C++
+model-driven generation path.
+
+---
+
+## Priority closure order (fidelity-first)
+
+1. Port C++ `suggest`/`SuggestMgr` staged flow and retire Levenshtein-only ranking.
+2. Expand parser/runtime directive coverage for remaining compound and suggestion controls.
+3. Port `csutil`-equivalent casing path and remove Locale-root fallback assumptions.
+4. Align BREAK and spell-info propagation with C++ branching semantics.
+5. Replace API stubs (`key`, `strictAffixParsing`, metadata placeholders) with real behavior.
+6. Rework `generate2` toward C++ morphology/flag-driven generation.
