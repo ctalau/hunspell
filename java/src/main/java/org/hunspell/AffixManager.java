@@ -52,6 +52,7 @@ final class AffixManager {
     private boolean checkCompoundCase;
     private final List<String> breakTable = new ArrayList<>();
     private final IconvTable inputConversions = new IconvTable();
+    private final List<RepEntry> repTable = new ArrayList<>();
     private boolean breakTableExplicit;
     private final Map<Integer, List<AffixRule>> prefixes = new HashMap<>();
     private final Map<Integer, List<AffixRule>> suffixes = new HashMap<>();
@@ -132,6 +133,34 @@ final class AffixManager {
 
     boolean checkCompoundCase() {
         return checkCompoundCase;
+    }
+
+    /**
+     * Replacement table mirroring {@code HashMgr::reptable} / C++
+     * {@code struct replentry}. Each entry has a pattern (with leading {@code ^}
+     * and trailing {@code $} anchors stripped at parse time) and a 4-slot
+     * output array indexed by position type: {@code 0=med}, {@code 1=ini},
+     * {@code 2=fin}, {@code 3=isol}.
+     */
+    static final class RepEntry {
+        private final String pattern;
+        private final String[] outstrings = {"", "", "", ""};
+
+        RepEntry(String pattern) {
+            this.pattern = pattern;
+        }
+
+        String pattern() {
+            return pattern;
+        }
+
+        String outstring(int type) {
+            return outstrings[type];
+        }
+    }
+
+    List<RepEntry> repTable() {
+        return Collections.unmodifiableList(repTable);
     }
 
     List<String> breakTable() {
@@ -330,6 +359,30 @@ final class AffixManager {
                     String[] aliasParts = aliasLine.split("\\s+");
                     if (aliasParts.length >= 2 && "AF".equals(aliasParts[0])) {
                         flagAliases.add(Flags.decode(aliasParts[1], flagMode));
+                    }
+                    read++;
+                }
+                continue;
+            }
+            if ("REP".equals(parts[0]) && parts.length >= 2 && parts[1].matches("\\d+")) {
+                // Mirrors C++ `HashMgr::parse_reptable`: read `numrep` lines,
+                // each `REP <pattern> <replacement>`. A leading `^` sets
+                // type=1 (ini), a trailing `$` adds 2 (so `^..$` → 3, isol).
+                // `_` is translated to space in both pattern and replacement.
+                int count = Integer.parseInt(parts[1]);
+                int read = 0;
+                while (read < count && i + 1 < lines.size()) {
+                    i++;
+                    String repLine = stripUtf8Bom(lines.get(i)).strip();
+                    if (repLine.isEmpty() || repLine.startsWith("#")) {
+                        continue;
+                    }
+                    // Mirrors C++ `mystrsep` tokenization: consume the first
+                    // three whitespace-separated tokens (REP, pattern,
+                    // replacement) and ignore trailing comments or garbage.
+                    String[] repParts = repLine.split("\\s+");
+                    if (repParts.length >= 3 && "REP".equals(repParts[0])) {
+                        addRepEntry(repParts[1], repParts[2]);
                     }
                     read++;
                 }
@@ -561,6 +614,34 @@ final class AffixManager {
         private IconvEntry(String pattern) {
             this.pattern = pattern;
         }
+    }
+
+    /**
+     * Insert a new REP table entry, matching the anchor/underscore handling
+     * in {@code HashMgr::parse_reptable}.
+     */
+    private void addRepEntry(String patternRaw, String replacementRaw) {
+        if (patternRaw == null || patternRaw.isEmpty() || replacementRaw == null || replacementRaw.isEmpty()) {
+            return;
+        }
+        int type = 0;
+        String pattern = patternRaw;
+        if (pattern.charAt(0) == '^') {
+            pattern = pattern.substring(1);
+            type = 1;
+        }
+        if (!pattern.isEmpty() && pattern.charAt(pattern.length() - 1) == '$') {
+            pattern = pattern.substring(0, pattern.length() - 1);
+            type += 2;
+        }
+        pattern = pattern.replace("_", " ");
+        String replacement = replacementRaw.replace("_", " ");
+        if (pattern.isEmpty() || replacement.isEmpty()) {
+            return;
+        }
+        RepEntry entry = new RepEntry(pattern);
+        entry.outstrings[type] = replacement;
+        repTable.add(entry);
     }
 
     private void addRule(AffixRule rule) {

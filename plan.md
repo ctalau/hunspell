@@ -9,6 +9,10 @@ Status legend: ✅ completed · 🟡 in progress · ⬜ not started
   case fallback, forbidden/needaffix/onlyincompound interactions).
 - ✅ Broad corpus-port coverage exists in Java tests and currently remains green.
 - ✅ Many compound and UTF fixtures now have passing Java ports.
+- ✅ REP suggestion stage ported from `SuggestMgr::replchars` with matching anchor
+  semantics (`^` → ini, `$` → fin, combined → isol), `_`→space translation, and the
+  "space in candidate" rewrite branch. REP-stage candidates now precede edit-stage
+  fallbacks to match C++ stage ordering.
 
 ## Current parity position
 
@@ -21,15 +25,18 @@ Status legend: ✅ completed · 🟡 in progress · ⬜ not started
 ## Phase A — Suggestion parity port (highest priority)
 
 1. Port `HunspellImpl::suggest` stage ordering exactly:
-   - edit suggestions
-   - REP table stage
-   - MAP class stage
-   - PHONE stage
-   - ngram fallback + weighting/order
+   - edit suggestions ⬜
+   - REP table stage ✅ (parse_reptable + replchars + testsug + checkword, incl. `^`/`$`
+     anchors, `_`→space translation, and the "space in candidate" rewrite branch)
+   - MAP class stage ⬜
+   - PHONE stage ⬜
+   - ngram fallback + weighting/order ⬜
 2. Port suggestion filtering controls fully:
-   - `NOSUGGEST`, `NONGRAMSUGGEST`, forbidden interactions, case-sensitive gating.
-3. Remove Java-only ranking heuristics once C++ ordering is in place.
-4. Add deterministic parity assertions for `sug`, `sug2`, `map`, `rep`, `phone`, `ph`, `sugutf`.
+   - `NOSUGGEST` ✅ (honored by the REP-stage `checkSuggestWord` filter),
+     `NONGRAMSUGGEST` ⬜, forbidden interactions 🟡, case-sensitive gating ⬜.
+3. Remove Java-only ranking heuristics once C++ ordering is in place. 🟡
+4. Add deterministic parity assertions for `sug`, `sug2`, `map`, `rep` ✅, `phone`,
+   `ph`, `sugutf`.
 
 **Exit criteria:** Java suggestion order matches C++ oracle on the ported fixtures.
 
