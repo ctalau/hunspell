@@ -117,6 +117,70 @@ class HunspellBootstrapTest {
     }
 
     @Test
+    void checkSignalsCompoundInfoBitForCompoundAcceptance() {
+        // Mirrors C++ `*info |= SPELL_COMPOUND` for compound-accepted forms
+        // in `tests/onlyincompound`: `foo` alone is a direct match, but
+        // `pseudofoo`/`foopseudo` are only accepted via compound segmentation.
+        Path affix = Path.of("..", "tests", "onlyincompound.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "onlyincompound.dic").normalize();
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            SpellResult direct = hunspell.check("foo");
+            assertTrue(direct.correct());
+            assertFalse(direct.compound(), "direct dictionary hit must not set SPELL_COMPOUND");
+            assertFalse(direct.forbidden());
+
+            SpellResult pseudofoo = hunspell.check("pseudofoo");
+            assertTrue(pseudofoo.correct());
+            assertTrue(pseudofoo.compound(), "compound-only acceptance must set SPELL_COMPOUND");
+            assertFalse(pseudofoo.forbidden());
+
+            SpellResult foopseudo = hunspell.check("foopseudo");
+            assertTrue(foopseudo.correct());
+            assertTrue(foopseudo.compound(), "compound acceptance must set SPELL_COMPOUND");
+            assertFalse(foopseudo.forbidden());
+        }
+    }
+
+    @Test
+    void checkSignalsForbiddenInfoBitForForbiddenSurfaceForms() {
+        // Mirrors C++ `*info |= SPELL_FORBIDDEN` for FORBIDDENWORD surface
+        // forms (e.g., `bars`/`foos` in `tests/forbiddenword`) while
+        // homonym-rescued forms like `foo` remain accepted and non-forbidden.
+        Path affix = Path.of("..", "tests", "forbiddenword.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "forbiddenword.dic").normalize();
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            SpellResult foo = hunspell.check("foo");
+            assertTrue(foo.correct(), "`foo` has a non-forbidden homonym and must accept");
+            assertFalse(foo.forbidden(), "non-forbidden homonym must not set SPELL_FORBIDDEN");
+
+            SpellResult bars = hunspell.check("bars");
+            assertFalse(bars.correct(), "forbidden surface form must reject");
+            assertTrue(bars.forbidden(), "forbidden surface form must set SPELL_FORBIDDEN");
+
+            SpellResult foos = hunspell.check("foos");
+            assertFalse(foos.correct());
+            assertTrue(foos.forbidden());
+        }
+    }
+
+    @Test
+    void checkSignalsCompoundInfoBitForBreakRecursion() {
+        // Mirrors C++ `*info |= SPELL_COMPOUND` for break-driven recursion
+        // (HunspellImpl::spell break branches all set SPELL_COMPOUND).
+        Path affix = Path.of("..", "tests", "break.aff").normalize();
+        Path dictionary = Path.of("..", "tests", "break.dic").normalize();
+
+        try (Hunspell hunspell = Hunspell.builder().affix(affix).dictionary(dictionary).build()) {
+            SpellResult hyphen = hunspell.check("foo-bar");
+            assertTrue(hyphen.correct());
+            assertTrue(hyphen.compound(), "BREAK recursion must set SPELL_COMPOUND");
+            assertFalse(hyphen.forbidden());
+        }
+    }
+
+    @Test
     void dictionaryParsingSupportsEscapedSlashEntries() throws IOException {
         Path dictionary = writeDictionary("3", "1\\/2", "http:\\/\\/", "\\/usr\\/share\\/myspell\\/");
 

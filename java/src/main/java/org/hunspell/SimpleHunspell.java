@@ -36,14 +36,14 @@ final class SimpleHunspell implements Hunspell {
 
     @Override
     public boolean spell(String word) {
-        return resolveStem(word) != null;
+        return resolveInfo(word).correct();
     }
 
     @Override
     public SpellResult check(String word) {
-        String stem = resolveStem(word);
-        boolean correct = stem != null;
-        return new SpellResult(correct, false, false, correct ? stem : null);
+        SpellInfo info = resolveInfo(word);
+        return new SpellResult(info.correct(), info.compound(), info.forbidden(),
+            info.correct() ? info.stem() : null);
     }
 
     @Override
@@ -306,55 +306,84 @@ final class SimpleHunspell implements Hunspell {
     }
 
     /**
+     * Internal spell pipeline return value mirroring the C++ {@code info}
+     * output word from {@code HunspellImpl::spell}. Tracks the accepted stem
+     * (or {@code null}), and the {@code SPELL_COMPOUND} / {@code SPELL_FORBIDDEN}
+     * info bits produced along the lookup ladder.
+     */
+    private record SpellInfo(boolean correct, boolean compound, boolean forbidden, String stem) {
+        static final SpellInfo NONE = new SpellInfo(false, false, false, null);
+        static final SpellInfo FORBIDDEN = new SpellInfo(false, false, true, null);
+
+        static SpellInfo accepted(String stem) {
+            return new SpellInfo(true, false, false, stem);
+        }
+
+        static SpellInfo acceptedCompound(String stem) {
+            return new SpellInfo(true, true, false, stem);
+        }
+    }
+
+    /**
      * Walks the same lookup ladder as {@code HunspellImpl::spell}: the caller's
      * word first, then (if still unresolved) a BREAK-driven recursive split,
      * trailing-dot normalisation, and case-variant fallbacks. FORBIDDENWORD on
      * the surface form short-circuits the ladder so a forbidden entry cannot be
-     * rescued by a lowercased variant or by affix derivation.
+     * rescued by a lowercased variant or by affix derivation. Returns spell
+     * info including C++-parity {@code SPELL_COMPOUND}/{@code SPELL_FORBIDDEN}
+     * bits, so {@link #check(String)} can expose them via {@link SpellResult}.
      */
-    private String resolveStem(String word) {
+    private SpellInfo resolveInfo(String word) {
         if (word == null || word.isEmpty()) {
-            return null;
+            return SpellInfo.NONE;
         }
         LookupResult direct = lookupVariant(word, /*inCompound=*/ false);
         if (direct.accepted()) {
-            return direct.stem();
+            return SpellInfo.accepted(direct.stem());
         }
         if (direct.forbidden()) {
-            return null;
+            // Matches C++ `*info |= SPELL_FORBIDDEN; return NULL;` short-circuit
+            // before break/compound recursion (`!(*info & SPELL_FORBIDDEN)`).
+            return SpellInfo.FORBIDDEN;
         }
         if (compoundCheck(word)) {
-            return word;
+            return SpellInfo.acceptedCompound(word);
         }
         if (spellBreak(word, /*depth=*/ 0)) {
-            return word;
+            // C++ sets `*info |= SPELL_COMPOUND` for every accepted break branch.
+            return SpellInfo.acceptedCompound(word);
         }
         String withoutTrailingDots = stripTrailingDots(word);
         if (!withoutTrailingDots.equals(word) && !withoutTrailingDots.isEmpty()) {
-            String stem = resolveStem(withoutTrailingDots);
-            if (stem != null) {
-                return stem;
+            SpellInfo sub = resolveInfo(withoutTrailingDots);
+            if (sub.correct() || sub.forbidden()) {
+                return sub;
             }
         }
+        // Mirrors C++ `HunspellImpl::spell` case-fallback ladder: INITCAP
+        // and ALLCAP forms retry lowercased (and, for ALLCAP, capitalized).
+        // KEEPCASE entries are rejected in these case-normalized branches,
+        // matching the C++ `if (rv && is_keepcase(rv) && ...) rv = NULL;`
+        // check that cancels acceptance when the surface case differs.
         if (isTitleCase(word)) {
             String lower = word.toLowerCase(Locale.ROOT);
             LookupResult lr = lookupVariant(lower, /*inCompound=*/ false);
-            if (lr.accepted()) {
-                return lr.stem();
+            if (lr.accepted() && !lr.keepCase()) {
+                return SpellInfo.accepted(lr.stem());
             }
         } else if (isAllUpper(word)) {
             String lower = word.toLowerCase(Locale.ROOT);
             LookupResult lr = lookupVariant(lower, /*inCompound=*/ false);
-            if (lr.accepted()) {
-                return lr.stem();
+            if (lr.accepted() && !lr.keepCase()) {
+                return SpellInfo.accepted(lr.stem());
             }
             String capitalized = capitalize(lower);
             lr = lookupVariant(capitalized, /*inCompound=*/ false);
-            if (lr.accepted()) {
-                return lr.stem();
+            if (lr.accepted() && !lr.keepCase()) {
+                return SpellInfo.accepted(lr.stem());
             }
         }
-        return null;
+        return SpellInfo.NONE;
     }
 
     /**
@@ -362,12 +391,16 @@ final class SimpleHunspell implements Hunspell {
      * distinguishes "found", "not found (fall through)", and
      * "found-but-forbidden (short circuit)".
      */
-    private record LookupResult(boolean accepted, boolean forbidden, String stem) {
-        static final LookupResult NONE = new LookupResult(false, false, null);
-        static final LookupResult FORBIDDEN = new LookupResult(false, true, null);
+    private record LookupResult(boolean accepted, boolean forbidden, boolean keepCase, String stem) {
+        static final LookupResult NONE = new LookupResult(false, false, false, null);
+        static final LookupResult FORBIDDEN = new LookupResult(false, true, false, null);
 
         static LookupResult of(String stem) {
-            return new LookupResult(true, false, stem);
+            return new LookupResult(true, false, false, stem);
+        }
+
+        static LookupResult of(String stem, boolean keepCase) {
+            return new LookupResult(true, false, keepCase, stem);
         }
     }
 
@@ -376,6 +409,7 @@ final class SimpleHunspell implements Hunspell {
         int forbiddenFlag = affixManager.forbiddenWordFlag();
         int needAffixFlag = affixManager.needAffixFlag();
         int onlyInCompoundFlag = affixManager.onlyInCompoundFlag();
+        int keepCaseFlag = affixManager.keepCaseFlag();
 
         List<HashManager.Entry> direct = hashManager.lookup(normalized);
         if (!direct.isEmpty()) {
@@ -393,7 +427,8 @@ final class SimpleHunspell implements Hunspell {
                 if (!inCompound && onlyInCompoundFlag >= 0 && entry.hasFlag(onlyInCompoundFlag)) {
                     continue;
                 }
-                return LookupResult.of(entry.stem());
+                boolean keepCase = keepCaseFlag >= 0 && entry.hasFlag(keepCaseFlag);
+                return LookupResult.of(entry.stem(), keepCase);
             }
             if (sawForbidden) {
                 // A FORBIDDENWORD surface form is final: don't fall through to affix
@@ -411,7 +446,8 @@ final class SimpleHunspell implements Hunspell {
             if (!inCompound && onlyInCompoundFlag >= 0 && hit.hasFlag(onlyInCompoundFlag)) {
                 return LookupResult.NONE;
             }
-            return LookupResult.of(hit.stem());
+            boolean keepCase = keepCaseFlag >= 0 && hit.hasFlag(keepCaseFlag);
+            return LookupResult.of(hit.stem(), keepCase);
         }
         return LookupResult.NONE;
     }
@@ -443,28 +479,94 @@ final class SimpleHunspell implements Hunspell {
         if (word.length() < min * 2) {
             return false;
         }
-        return compoundCheckFrom(word, 0, min, new ArrayList<>());
+        return compoundCheckFrom(word, 0, min, new ArrayList<>(), new ArrayList<>());
     }
 
     private boolean compoundCheckFrom(String word, int offset, int min,
-                                      List<int[]> sequence) {
+                                      List<int[]> sequence, List<String> segmentSequence) {
+        boolean dupCheck = affixManager.checkCompoundDup();
+        boolean tripleCheck = affixManager.checkCompoundTriple();
+        boolean caseCheck = affixManager.checkCompoundCase();
         for (int split = offset + min; split <= word.length(); split++) {
             String segment = word.substring(offset, split);
+            // Mirrors C++ affixmgr.cxx CHECKCOMPOUNDTRIPLE: reject a split when
+            // the boundary produces three consecutive identical letters (prev
+            // segment ends with XX and current segment starts with X, or
+            // previous ends with X and current starts with XX).
+            if (tripleCheck && !segmentSequence.isEmpty()
+                && tripleAtBoundary(segmentSequence.get(segmentSequence.size() - 1), segment)) {
+                continue;
+            }
+            // Mirrors C++ affixmgr.cxx `cpdcase_check`: reject if either side
+            // of the boundary is uppercase, unless one side is a dash.
+            if (caseCheck && !segmentSequence.isEmpty()
+                && caseAtBoundary(segmentSequence.get(segmentSequence.size() - 1), segment)) {
+                continue;
+            }
             List<int[]> flagsForSegment = compoundFlagsForSegment(segment);
             if (flagsForSegment.isEmpty()) {
                 continue;
             }
             for (int[] flags : flagsForSegment) {
                 sequence.add(flags);
+                segmentSequence.add(segment);
                 if (split == word.length()) {
-                    if (sequence.size() >= 2 && sequenceMatchesRules(sequence)) {
+                    // Mirrors C++ affixmgr.cxx `(!checkcompounddup || (rv != rv_first))`
+                    // at the 2-word terminal branch: reject only when the final
+                    // accepted pair consists of identical dictionary entries.
+                    boolean dupRejected = dupCheck && segmentSequence.size() >= 2
+                        && segmentSequence.get(segmentSequence.size() - 1)
+                            .equals(segmentSequence.get(segmentSequence.size() - 2));
+                    if (!dupRejected && sequence.size() >= 2 && sequenceMatchesRules(sequence)) {
                         return true;
                     }
-                } else if (word.length() - split >= min && compoundCheckFrom(word, split, min, sequence)) {
+                } else if (word.length() - split >= min
+                    && compoundCheckFrom(word, split, min, sequence, segmentSequence)) {
                     return true;
                 }
                 sequence.remove(sequence.size() - 1);
+                segmentSequence.remove(segmentSequence.size() - 1);
             }
+        }
+        return false;
+    }
+
+    /**
+     * True when the compound boundary between {@code prev} and {@code next}
+     * has an uppercase letter on either side (and neither side is a dash).
+     * Mirrors C++ `AffixMgr::cpdcase_check`.
+     */
+    private static boolean caseAtBoundary(String prev, String next) {
+        if (prev.isEmpty() || next.isEmpty()) {
+            return false;
+        }
+        int a = prev.codePointAt(prev.length() - Character.charCount(prev.codePointBefore(prev.length())));
+        int b = next.codePointAt(0);
+        if (a == '-' || b == '-') {
+            return false;
+        }
+        return Character.isUpperCase(a) || Character.isUpperCase(b);
+    }
+
+    /**
+     * True when joining {@code prev}+{@code next} produces three consecutive
+     * identical characters spanning the boundary. Mirrors the C++ triple
+     * letter test in {@code affixmgr.cxx} used by CHECKCOMPOUNDTRIPLE.
+     */
+    private static boolean tripleAtBoundary(String prev, String next) {
+        if (prev.isEmpty() || next.isEmpty()) {
+            return false;
+        }
+        char last = prev.charAt(prev.length() - 1);
+        char first = next.charAt(0);
+        if (last != first) {
+            return false;
+        }
+        if (prev.length() >= 2 && prev.charAt(prev.length() - 2) == last) {
+            return true;
+        }
+        if (next.length() >= 2 && next.charAt(1) == first) {
+            return true;
         }
         return false;
     }

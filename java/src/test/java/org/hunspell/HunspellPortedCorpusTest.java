@@ -1082,6 +1082,14 @@ class HunspellPortedCorpusTest {
     }
 
     @Test
+    void keepcaseCorpusWrong_allWordsRejected() {
+        // Mirrors C++ KEEPCASE semantics in `HunspellImpl::spell`: words whose
+        // matched entry has KEEPCASE may not be accepted via ALLCAP/INITCAP
+        // case-fallback, so `Foo`/`FOO`/`BAR`/`Baz.`/`QUUX.` are rejected.
+        assertAllRejected(Path.of("..", "tests", "keepcase.aff").normalize(), Path.of("..", "tests", "keepcase.dic").normalize(), Path.of("..", "tests", "keepcase.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
     void aliasCorpusGood_allWordsAccepted() {
         assertAllAccepted(Path.of("..", "tests", "alias.aff").normalize(), Path.of("..", "tests", "alias.dic").normalize(), Path.of("..", "tests", "alias.good").normalize(), StandardCharsets.ISO_8859_1);
     }
@@ -1439,10 +1447,25 @@ class HunspellPortedCorpusTest {
         assertAllAccepted(Path.of("..", "tests", "checkcompounddup.aff").normalize(), Path.of("..", "tests", "checkcompounddup.dic").normalize(), Path.of("..", "tests", "checkcompounddup.good").normalize(), StandardCharsets.ISO_8859_1);
     }
 
+    @Test
+    void checkcompounddupCorpusWrong_allWordsRejected() {
+        // Mirrors C++ CHECKCOMPOUNDDUP semantics: forbid 2-word compound pairs
+        // whose adjacent parts are identical (`foofoo`, `foofoofoo`, `foobarbar`).
+        assertAllRejected(Path.of("..", "tests", "checkcompounddup.aff").normalize(), Path.of("..", "tests", "checkcompounddup.dic").normalize(), Path.of("..", "tests", "checkcompounddup.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
 
     @Test
     void checkcompoundtripleCorpusGood_allWordsAccepted() {
         assertAllAccepted(Path.of("..", "tests", "checkcompoundtriple.aff").normalize(), Path.of("..", "tests", "checkcompoundtriple.dic").normalize(), Path.of("..", "tests", "checkcompoundtriple.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompoundtripleCorpusWrong_allWordsRejected() {
+        // Mirrors C++ CHECKCOMPOUNDTRIPLE semantics: forbid compound splits
+        // that produce three consecutive identical letters over the boundary
+        // (e.g., `foo`+`opera` → `fooopera`, `bare`+`eel` → `bareeel`).
+        assertAllRejected(Path.of("..", "tests", "checkcompoundtriple.aff").normalize(), Path.of("..", "tests", "checkcompoundtriple.dic").normalize(), Path.of("..", "tests", "checkcompoundtriple.wrong").normalize(), StandardCharsets.ISO_8859_1);
     }
 
 
@@ -1458,6 +1481,20 @@ class HunspellPortedCorpusTest {
     @Test
     void checkcompoundcase2CorpusWrong_allWordsRejected() {
         assertAllRejected(Path.of("..", "tests", "checkcompoundcase2.aff").normalize(), Path.of("..", "tests", "checkcompoundcase2.dic").normalize(), Path.of("..", "tests", "checkcompoundcase2.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompoundcaseCorpusGood_allWordsAccepted() {
+        // Mirrors C++ CHECKCOMPOUNDCASE `cpdcase_check` accept path: compounds
+        // whose boundary has a dash (or where both sides are lower) are OK.
+        assertAllAccepted(Path.of("..", "tests", "checkcompoundcase.aff").normalize(), Path.of("..", "tests", "checkcompoundcase.dic").normalize(), Path.of("..", "tests", "checkcompoundcase.good").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void checkcompoundcaseCorpusWrong_allWordsRejected() {
+        // Mirrors C++ CHECKCOMPOUNDCASE reject path: `fooBar`, `BAZBar`,
+        // `BAZfoo` all have uppercase on a boundary side without a dash.
+        assertAllRejected(Path.of("..", "tests", "checkcompoundcase.aff").normalize(), Path.of("..", "tests", "checkcompoundcase.dic").normalize(), Path.of("..", "tests", "checkcompoundcase.wrong").normalize(), StandardCharsets.ISO_8859_1);
     }
 
     @Test
@@ -1585,6 +1622,72 @@ class HunspellPortedCorpusTest {
     void limit_multiple_compoundingCorpusGood_allWordsAccepted() {
         assertAllAccepted(Path.of("..", "tests", "limit-multiple-compounding.aff").normalize(), Path.of("..", "tests", "limit-multiple-compounding.dic").normalize(), Path.of("..", "tests", "limit-multiple-compounding.good").normalize(), StandardCharsets.ISO_8859_1);
     }
+
+    @Test
+    void baseCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "base.aff").normalize(), Path.of("..", "tests", "base.dic").normalize(), Path.of("..", "tests", "base.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void breakCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "break.aff").normalize(), Path.of("..", "tests", "break.dic").normalize(), Path.of("..", "tests", "break.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void checkcompoundcase2CorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "checkcompoundcase2.aff").normalize(), Path.of("..", "tests", "checkcompoundcase2.dic").normalize(), Path.of("..", "tests", "checkcompoundcase2.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void checkcompoundcaseutfCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "checkcompoundcaseutf.aff").normalize(), Path.of("..", "tests", "checkcompoundcaseutf.dic").normalize(), Path.of("..", "tests", "checkcompoundcaseutf.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void checkcompoundpatternCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "checkcompoundpattern.aff").normalize(), Path.of("..", "tests", "checkcompoundpattern.dic").normalize(), Path.of("..", "tests", "checkcompoundpattern.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void checkcompoundrepCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "checkcompoundrep.aff").normalize(), Path.of("..", "tests", "checkcompoundrep.dic").normalize(), Path.of("..", "tests", "checkcompoundrep.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void complexprefixesCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "complexprefixes.aff").normalize(), Path.of("..", "tests", "complexprefixes.dic").normalize(), Path.of("..", "tests", "complexprefixes.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void complexprefixesutfCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "complexprefixesutf.aff").normalize(), Path.of("..", "tests", "complexprefixesutf.dic").normalize(), Path.of("..", "tests", "complexprefixesutf.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void dotless_iCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "dotless_i.aff").normalize(), Path.of("..", "tests", "dotless_i.dic").normalize(), Path.of("..", "tests", "dotless_i.wrong").normalize(), StandardCharsets.ISO_8859_1);
+    }
+
+    @Test
+    void needaffixCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "needaffix.aff").normalize(), Path.of("..", "tests", "needaffix.dic").normalize(), Path.of("..", "tests", "needaffix.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void nepaliCorpusGood_allWordsAccepted() {
+        assertAllAccepted(Path.of("..", "tests", "nepali.aff").normalize(), Path.of("..", "tests", "nepali.dic").normalize(), Path.of("..", "tests", "nepali.good").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void simplifiedtripleCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "simplifiedtriple.aff").normalize(), Path.of("..", "tests", "simplifiedtriple.dic").normalize(), Path.of("..", "tests", "simplifiedtriple.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void utfcompoundCorpusWrong_allWordsRejected() {
+        assertAllRejected(Path.of("..", "tests", "utfcompound.aff").normalize(), Path.of("..", "tests", "utfcompound.dic").normalize(), Path.of("..", "tests", "utfcompound.wrong").normalize(), StandardCharsets.UTF_8);
+    }
+
 
 
     private static void assertConditionAccepted(String word) {
